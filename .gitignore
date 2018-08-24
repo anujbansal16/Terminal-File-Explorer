@@ -1,3 +1,4 @@
 mydir
+EmptyDir
 *.o
 *.out

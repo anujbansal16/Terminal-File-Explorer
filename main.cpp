@@ -48,20 +48,27 @@ int main(){
 				            cursorForward(1);
 				            break;
 				        case 'D':
-				            cursorBackward(1);
+				            totalfiles=backDirect();
+				            currLine=1;
+				            cursorMove(1,1);
 				            break;
 				    }
 
 			}
 			else if(c==10){
-				totalfiles=enterDirectory(currLine);
-				currLine=1;
-        		cursorMove(1,1);
+
+				long returnValue=enterDirectory(currLine);
+				if(returnValue!=-1){
+					cursorMove(1,1);	
+					currLine=1;	
+					totalfiles=returnValue;
+				}
 			}
 
 			else if( c==':'){
 				isCommand=true;
-				cursorMove(totalfiles+2,1);
+				//cursorMove(totalfiles+2,1);
+				cursorMove(1000,1);
 			}
 			else if ( c == 'Q' || c == 'q'){
 		    	cursorMove(totalfiles+1,1);
@@ -72,7 +79,7 @@ int main(){
 		else{
 			//char c2=getchar();
 			if(c==ESC){
-
+				clearLine();
 		    	isCommand=!isCommand;
 		    	currLine=1;
 		    	cursorMove(1,1);

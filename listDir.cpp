@@ -10,7 +10,32 @@ vector<string> Flist;
 vector<string> stck;
 map <string,bool> fileToISDirecMap;
 
-unsigned long openFile(string filePath){
+
+unsigned long backDirect(){
+    unsigned long totalfiles=Flist.size();
+    if((stck.back().compare("./")!=0)){
+        string path;
+        stck.pop_back();    
+        for (vector<string>::iterator i= stck.begin(); i != stck.end(); ++i){
+            path+=*i;
+        }
+
+        DIR * pDir = openDirectory(path.c_str());
+        getFileList(pDir);
+        totalfiles=Flist.size();
+        clearConsole();
+        for (vector<string>::iterator iDirentName = Flist.begin(); iDirentName != Flist.end(); ++iDirentName)
+        { 
+            printStatInfo(getStatInfo(path,*iDirentName),*iDirentName);
+        }
+        closedir (pDir);
+
+    }
+    return totalfiles;
+    
+}
+
+void openFile(string filePath){
     pid_t pid = fork();
     int status;
     if (pid == -1){
@@ -20,43 +45,64 @@ unsigned long openFile(string filePath){
     if (pid == 0) {
         if(execl("/usr/bin/xdg-open", "xdg-open",filePath.c_str(),NULL)<0){
             perror ("execv");
+
             exit(0);
         }
     }
     else{
-
-       
+         if (waitpid(pid, &status, 0) > 0) {
+            if (WIFEXITED(status) && !WEXITSTATUS(status)) ;
+              //printf("program execution successfull\n");
+             
+        } 
+        else {
+           printf("waitpid() failed\n");
+           exit(0);
+        }
     }
-    return -1;
+    
 }
 
 
-unsigned long enterDirectory(unsigned long indexOfFile){
-    string s1="./";
-    string fName=Flist[indexOfFile-1];
-    string filePath=s1+fName;
-    //cout<<fName<<endl;
+long enterDirectory(unsigned long indexOfFile){
+    string s1="";
+    //appending strings from stack to get full path
+    for (vector<string>::iterator i= stck.begin(); i != stck.end(); ++i){
+        s1+=*i;
+    }
+    string fName=Flist[indexOfFile-1];  //name of the file or directory
+    if((stck.back().compare("./")==0)&&fName.compare("..")==0)
+        fName=".";
+    string filePath=s1+fName+"/";//makeing relative path
     unsigned long totalfiles;
+
+    //open the directory if its entered
     if(fileToISDirecMap.find(fName)!=fileToISDirecMap.end()){
         if(fileToISDirecMap[fName]){
-            cout<<filePath.c_str()<<endl;
             DIR * pDir = openDirectory(filePath.c_str());
             getFileList(pDir);
+            if(fName.compare(".")==0);//no push pop in case filename is .
+            else if(fName.compare("..")==0)//pop out the last directory name from stack
+                stck.pop_back();
+            else//keep pusing directory names
+                stck.push_back(fName+"/");
             totalfiles=Flist.size();
             //cout<<totalfiles;    
             clearConsole();
+            //cout<<filePath<<endl;
             for (vector<string>::iterator iDirentName = Flist.begin(); iDirentName != Flist.end(); ++iDirentName)
-            {   //cout<<*iDirentName<<endl;
+            { 
                 printStatInfo(getStatInfo(filePath,*iDirentName),*iDirentName);
             }
             closedir (pDir);
         }
-        return totalfiles;
     }
-    else{
+    //open the file if the file is entered
+    else{        
         openFile(filePath);
+        totalfiles=-1;
     }
-    return -1;  
+    return totalfiles;
 }
 
 DIR * openDirectory(const char* s){
@@ -64,7 +110,7 @@ DIR * openDirectory(const char* s){
     pDir = opendir(s);
     if (pDir == NULL) {
             perror(strerror(errno));
-            exit(1);
+            //exit(1);
     }
     //cout<<readdir(pDir)->d_name;
     return pDir;
@@ -90,7 +136,7 @@ unsigned long initialLS(){
 		unsigned long totalfiles;	
         //struct dirent *pDirent;
         DIR *pDir;
-        const char* rootPath=".";
+        const char* rootPath="./";
         stck.push_back(rootPath);
         pDir = openDirectory(rootPath);
         getFileList(pDir);
@@ -106,7 +152,7 @@ unsigned long initialLS(){
 
 struct stat getStatInfo(string rootPath, string fName){
 	struct stat info;	
-	if(stat((rootPath+"/"+fName).c_str(), &info)==-1){
+	if(stat((rootPath+fName).c_str(), &info)==-1){
 		perror(strerror(errno));
     }
     if(S_ISDIR(info.st_mode))

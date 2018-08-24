@@ -24,8 +24,9 @@ struct stat getStatInfo(string rootPath, string fName);
 void printHead();
 DIR * openDirectory(const char* s);
 void getFileList(DIR * pDir);
-unsigned long enterDirectory(unsigned long indexOfFile);
+long enterDirectory(unsigned long indexOfFile);
 void printStatInfo(struct stat info, string fName);
-
+void openFile(string filePath);
+unsigned long backDirect();
 
 #endif

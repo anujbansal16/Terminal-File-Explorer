@@ -54,6 +54,11 @@ void cursorMove(int line, int column){
   //Position the Cursor:
    printf("\033[%d;%dH",line,column);
 }
+void clearLine(){
+  //clear current line
+  printf("%c[2K", 27);
+}
+
 
   
 

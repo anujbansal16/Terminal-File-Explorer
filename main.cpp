@@ -17,7 +17,7 @@ COPYRIGHT PROTECTED
 #include<iostream>
 using namespace std;
 
-
+extern vector<string> Flist;
 int main(){	
 	int c;
 	bool isCommand=false;
@@ -27,52 +27,60 @@ int main(){
     printf("Press Q to quit.\n");
     cursorMove(1,1);
     while (true) {
-		c=getch();
+    	c=getch();
 		/////////////////////////////Normal Mode////////////////////////////////
 		if(!isCommand){
-			if (c == ESC) { // if the first value is esc
-				//cout<<"Inside ESc";
-			    getch(); // skip the [
-			    switch(getch()) { // the real value
-			        case 'A':
-			            if(currLine<=1) continue;
-			            cursorUp(1);
-			            currLine--;
-			            break;
-			        case 'B':
-			        	if(currLine>=totalfiles) continue;
-			            cursorDown(1);
-			            currLine++;
-			            break;
-			        case 'C':
-			            cursorForward(1);
-			            break;
-			        case 'D':
-			            cursorBackward(1);
-			            break;
-			    }
+			if (c == ESC) { // if the first value is esc				
+				 // skip the [
+			    getch();
+				    switch(getch()) { // the real value
+				        case 'A':
+				            if(currLine<=1) continue;
+				            cursorUp(1);
+				            currLine--;
+				            break;
+				        case 'B':
+				        	if(currLine>=totalfiles) continue;
+				            cursorDown(1);
+				            currLine++;
+				            break;
+				        case 'C':
+				            cursorForward(1);
+				            break;
+				        case 'D':
+				            cursorBackward(1);
+				            break;
+				    }
+
+			}
+			else if(c==10){
+				totalfiles=enterDirectory(currLine);
+				currLine=1;
+        		cursorMove(1,1);
 			}
 
-		else if( c==':'){
-			isCommand=true;
-			cursorMove(totalfiles+2,1);
+			else if( c==':'){
+				isCommand=true;
+				cursorMove(totalfiles+2,1);
+			}
+			else if ( c == 'Q' || c == 'q'){
+		    	cursorMove(totalfiles+1,1);
+		        break;
+		    }
 		}
-		else if ( c == 'Q' || c == 'q'){
-	    	cursorMove(totalfiles+1,1);
-	        break;
-	    }
-	}
 	///////////////////////////Normal Mode End////////////////////////////
-	else{
-		if(c==ESC){
-	    	isCommand=!isCommand;
-	    	currLine=1;
-	    	cursorMove(1,1);
-	    }
-	    else{
-        	printf("%c",c );
-	    }
-	}	
+		else{
+			//char c2=getchar();
+			if(c==ESC){
+
+		    	isCommand=!isCommand;
+		    	currLine=1;
+		    	cursorMove(1,1);
+		    }
+		    else{
+	        	printf("%c",c );
+		    }
+		}	
 	    
     }
  

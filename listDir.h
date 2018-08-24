@@ -13,13 +13,19 @@ COPYRIGHT PROTECTED
 #include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
+#include"utility.h"
 using namespace std;
 
 
 #ifndef INC_MODULE2_H
 #define INC_MODULE2_H
-
 unsigned long initialLS();
-void getStatInfo(string rootPath, string fName);
+struct stat getStatInfo(string rootPath, string fName);
 void printHead();
+DIR * openDirectory(const char* s);
+void getFileList(DIR * pDir);
+unsigned long enterDirectory(unsigned long indexOfFile);
+void printStatInfo(struct stat info, string fName);
+
+
 #endif

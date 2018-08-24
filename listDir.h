@@ -28,5 +28,6 @@ long enterDirectory(unsigned long indexOfFile);
 void printStatInfo(struct stat info, string fName);
 void openFile(string filePath);
 unsigned long backDirect();
+unsigned long forwardDirect();
 
 #endif

@@ -7,16 +7,61 @@ COPYRIGHT PROTECTED
 #include"listDir.h"
 #include <sys/wait.h>
 vector<string> Flist;
-vector<string> stck;
-map <string,bool> fileToISDirecMap;
+vector<string> stackBackHistory; // ./|dir1/|dir2|
+vector<string> stackForwardHistory;// dir1|dir2|
+map <string,bool> fileToISDirecMap; //filename mapping to boolean to determine if file is directory
 
+
+/*
+AUTHOR:         ANUJ
+DESCRIPTION:    Update the name of file and fetches visited directory files on right arrow key press using FORWARD Stack
+RETURN:         number of files present in the previous directory
+*/
+unsigned long forwardDirect(){
+    unsigned long totalfiles=Flist.size();
+    //check if forward stack is empty
+    if(!(stackForwardHistory.empty())){
+        //create path from backhistory stack
+        string currentpath="";
+        for (vector<string>::iterator i= stackBackHistory.begin(); i != stackBackHistory.end(); ++i){
+                currentpath+=*i;
+        }
+        //forward traverse directory should be popped out and will pushed in back history stack
+        string nextPath=stackForwardHistory.back();
+        stackForwardHistory.pop_back();
+        stackBackHistory.push_back(nextPath);
+
+        DIR * pDir = openDirectory((currentpath+nextPath).c_str());
+        getFileList(pDir);
+        totalfiles=Flist.size();
+        clearConsole();
+        for (vector<string>::iterator iDirentName = Flist.begin(); iDirentName != Flist.end(); ++iDirentName)
+        { 
+            printStatInfo(getStatInfo((currentpath+nextPath),*iDirentName),*iDirentName);
+        }
+        closedir (pDir);
+        }
+        
+        return totalfiles;
+
+}
+
+/*
+AUTHOR:         ANUJ
+DESCRIPTION:    Update the name of file and fetches previous directory files on left arrow key press using BACKWARD Stack
+RETURN:         number of files present in the previous directory
+*/
 
 unsigned long backDirect(){
     unsigned long totalfiles=Flist.size();
-    if((stck.back().compare("./")!=0)){
+    //check if we are at root ie './''
+    if((stackBackHistory.back().compare("./")!=0)){
         string path;
-        stck.pop_back();    
-        for (vector<string>::iterator i= stck.begin(); i != stck.end(); ++i){
+        //push the directory from where we are going back for forward traversing
+        stackForwardHistory.push_back(stackBackHistory.back());
+        //take the current directory out to go back on previous directory
+        stackBackHistory.pop_back();    
+        for (vector<string>::iterator i= stackBackHistory.begin(); i != stackBackHistory.end(); ++i){
             path+=*i;
         }
 
@@ -35,6 +80,12 @@ unsigned long backDirect(){
     
 }
 
+/*
+AUTHOR:         ANUJ
+DESCRIPTION:    Open up the file using xdg-open
+PARAMETERS:     path of file
+*/
+
 void openFile(string filePath){
     pid_t pid = fork();
     int status;
@@ -45,7 +96,6 @@ void openFile(string filePath){
     if (pid == 0) {
         if(execl("/usr/bin/xdg-open", "xdg-open",filePath.c_str(),NULL)<0){
             perror ("execv");
-
             exit(0);
         }
     }
@@ -63,29 +113,46 @@ void openFile(string filePath){
     
 }
 
+/*
+AUTHOR:         ANUJ
+DESCRIPTION:    This function handles ENTER KEY PRESS EVENT
+PARAMETERS:     line number where user hit ENTER
+RETURN:         number of files(if directory) | -1 (if regular file)
+*/
 
 long enterDirectory(unsigned long indexOfFile){
-    string s1="";
-    //appending strings from stack to get full path
-    for (vector<string>::iterator i= stck.begin(); i != stck.end(); ++i){
-        s1+=*i;
-    }
-    string fName=Flist[indexOfFile-1];  //name of the file or directory
-    if((stck.back().compare("./")==0)&&fName.compare("..")==0)
-        fName=".";
-    string filePath=s1+fName+"/";//makeing relative path
+    string path="";//path of the parent directory of directory we are entering
     unsigned long totalfiles;
 
-    //open the directory if its entered
+    //appending strings from stack to get full path
+    for (vector<string>::iterator i= stackBackHistory.begin(); i != stackBackHistory.end(); ++i){
+        path+=*i;
+    }
+    string fName=Flist[indexOfFile-1];  //name of the file or directory
+    
+    if((stackBackHistory.back().compare("./")==0)){
+        //controlling enter press on .. in root directory
+        if(fName.compare("..")==0){
+            fName=".";
+        }
+        //clearing forward history once we are at root
+        stackForwardHistory.clear();
+    }
+        
+    string filePath=path+fName+"/";//makeing relative path
+
+    //Check if file is directory and push its name in stack
     if(fileToISDirecMap.find(fName)!=fileToISDirecMap.end()){
         if(fileToISDirecMap[fName]){
             DIR * pDir = openDirectory(filePath.c_str());
             getFileList(pDir);
             if(fName.compare(".")==0);//no push pop in case filename is .
-            else if(fName.compare("..")==0)//pop out the last directory name from stack
-                stck.pop_back();
+            else if(fName.compare("..")==0){//pop out the last directory name from stack
+                stackForwardHistory.push_back(stackBackHistory.back());
+                stackBackHistory.pop_back();
+            }
             else//keep pusing directory names
-                stck.push_back(fName+"/");
+                stackBackHistory.push_back(fName+"/");//format - dirname/
             totalfiles=Flist.size();
             //cout<<totalfiles;    
             clearConsole();
@@ -97,7 +164,7 @@ long enterDirectory(unsigned long indexOfFile){
             closedir (pDir);
         }
     }
-    //open the file if the file is entered
+    //open the file if the regular file is entered
     else{        
         openFile(filePath);
         totalfiles=-1;
@@ -105,31 +172,11 @@ long enterDirectory(unsigned long indexOfFile){
     return totalfiles;
 }
 
-DIR * openDirectory(const char* s){
-	DIR *pDir;
-    pDir = opendir(s);
-    if (pDir == NULL) {
-            perror(strerror(errno));
-            //exit(1);
-    }
-    //cout<<readdir(pDir)->d_name;
-    return pDir;
-}
 
-
-void getFileList(DIR * pDir){
-    Flist.clear();
-    fileToISDirecMap.clear();
-    struct dirent *pDirent;
-    while ((pDirent = readdir(pDir)) != NULL) {
-        string s=pDirent->d_name;
-        Flist.push_back(s);                        
-    }
-    //cout<<Flist.size();
-    if(!Flist.empty())
-        sort(Flist.begin(),Flist.end());
-
-}
+/*
+AUTHOR:         ANUJ
+DESCRIPTION:    This function will print the iniitial ls -l kind of list of current directory files
+*/
 
 unsigned long initialLS(){
 
@@ -137,7 +184,7 @@ unsigned long initialLS(){
         //struct dirent *pDirent;
         DIR *pDir;
         const char* rootPath="./";
-        stck.push_back(rootPath);
+        stackBackHistory.push_back(rootPath);
         pDir = openDirectory(rootPath);
         getFileList(pDir);
         totalfiles=Flist.size();        
@@ -150,15 +197,67 @@ unsigned long initialLS(){
 
 }
 
+
+/*
+AUTHOR:         ANUJ
+DESCRIPTION:    Open and return the directory
+PARAMETERS:     path of directory
+*/
+
+DIR * openDirectory(const char* s){
+    DIR *pDir;
+    pDir = opendir(s);
+    if (pDir == NULL) {
+            perror(strerror(errno));
+            //exit(1);
+    }
+    //cout<<readdir(pDir)->d_name;
+    return pDir;
+}
+
+
+/*
+AUTHOR:         ANUJ
+DESCRIPTION:    This function initialize the vector of file names
+PARAMETERS:     DIR * - directory we want to read
+*/
+
+void getFileList(DIR * pDir){
+    Flist.clear();
+    fileToISDirecMap.clear();
+    struct dirent *pDirent;
+    while ((pDirent = readdir(pDir)) != NULL) {
+        string s=pDirent->d_name;
+        Flist.push_back(s);                        
+    }
+    if(!Flist.empty())
+        sort(Flist.begin(),Flist.end());
+
+}
+
+/*
+AUTHOR:         ANUJ
+DESCRIPTION:    This function will return the stat of a file.
+PARAMETERS:     Path of directory of file (ended with /) , filename
+*/
+
 struct stat getStatInfo(string rootPath, string fName){
-	struct stat info;	
-	if(stat((rootPath+fName).c_str(), &info)==-1){
-		perror(strerror(errno));
+    struct stat info;   
+    if(stat((rootPath+fName).c_str(), &info)==-1){
+        perror(strerror(errno));
     }
     if(S_ISDIR(info.st_mode))
         fileToISDirecMap[fName]=true;
     return info;
 }
+
+
+/*
+AUTHOR:         ANUJ
+DESCRIPTION:    This function will print the row of File information
+PARAMETERS:     stat, filename
+*/
+
 
 void printStatInfo(struct stat info, string fName){
     struct passwd *pswd=getpwuid(info.st_uid);
@@ -179,6 +278,13 @@ void printStatInfo(struct stat info, string fName){
     cout<<endl; 
 }
 
+
+/*
+
+AUTHOR: ANUJ
+DESCRIPTION:    This function will print the header information of file listed
+
+*/
 void printHead(){
 	//cout<<"PERMISSIONS"<<"\t"<<"OWNER"<<"\t"<<"GROUP"<<"\t"<<"SIZE"<<"\t"<<"LAST-MODIFIED"<<"\t\t\t"<<"NAME\n";
 }

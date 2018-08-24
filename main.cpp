@@ -45,7 +45,9 @@ int main(){
 				            currLine++;
 				            break;
 				        case 'C':
-				            cursorForward(1);
+				            totalfiles=forwardDirect();
+				            currLine=1;
+				            cursorMove(1,1);
 				            break;
 				        case 'D':
 				            totalfiles=backDirect();

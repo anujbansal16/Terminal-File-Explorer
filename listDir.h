@@ -13,6 +13,7 @@ COPYRIGHT PROTECTED
 #include <unistd.h>
 #include <pwd.h>
 #include <grp.h>
+#include <sys/ioctl.h>
 #include"utility.h"
 using namespace std;
 
@@ -29,5 +30,6 @@ void printStatInfo(struct stat info, string fName);
 void openFile(string filePath);
 unsigned long backDirect();
 unsigned long forwardDirect();
+void printFilesWinDependent(unsigned long firstIndex,unsigned long lastIndex,string path);
 
 #endif

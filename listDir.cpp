@@ -7,9 +7,19 @@ COPYRIGHT PROTECTED
 #include"listDir.h"
 #include <sys/wait.h>
 vector<string> Flist;
+struct winsize w;   
+unsigned long windLine;
 vector<string> stackBackHistory; // ./|dir1/|dir2|
 vector<string> stackForwardHistory;// dir1|dir2|
 map <string,bool> fileToISDirecMap; //filename mapping to boolean to determine if file is directory
+
+void printFilesWinDependent(unsigned long firstIndex,unsigned long lastIndex,string path){
+        //0-41
+        for(unsigned long i=firstIndex;i<lastIndex&&i<Flist.size();i++){
+            string s=Flist[i];
+            printStatInfo(getStatInfo((path),s),s);    
+        }
+}
 
 
 /*
@@ -18,6 +28,7 @@ DESCRIPTION:    Update the name of file and fetches visited directory files on r
 RETURN:         number of files present in the previous directory
 */
 unsigned long forwardDirect(){
+    ioctl(0, TIOCGWINSZ, &w);
     unsigned long totalfiles=Flist.size();
     //check if forward stack is empty
     if(!(stackForwardHistory.empty())){
@@ -35,10 +46,7 @@ unsigned long forwardDirect(){
         getFileList(pDir);
         totalfiles=Flist.size();
         clearConsole();
-        for (vector<string>::iterator iDirentName = Flist.begin(); iDirentName != Flist.end(); ++iDirentName)
-        { 
-            printStatInfo(getStatInfo((currentpath+nextPath),*iDirentName),*iDirentName);
-        }
+        printFilesWinDependent(0,windLine-1,currentpath+nextPath);
         closedir (pDir);
         }
         
@@ -69,10 +77,7 @@ unsigned long backDirect(){
         getFileList(pDir);
         totalfiles=Flist.size();
         clearConsole();
-        for (vector<string>::iterator iDirentName = Flist.begin(); iDirentName != Flist.end(); ++iDirentName)
-        { 
-            printStatInfo(getStatInfo(path,*iDirentName),*iDirentName);
-        }
+        printFilesWinDependent(0,windLine-1,path);
         closedir (pDir);
 
     }
@@ -157,10 +162,7 @@ long enterDirectory(unsigned long indexOfFile){
             //cout<<totalfiles;    
             clearConsole();
             //cout<<filePath<<endl;
-            for (vector<string>::iterator iDirentName = Flist.begin(); iDirentName != Flist.end(); ++iDirentName)
-            { 
-                printStatInfo(getStatInfo(filePath,*iDirentName),*iDirentName);
-            }
+            printFilesWinDependent(0,windLine-1,filePath);
             closedir (pDir);
         }
     }
@@ -179,7 +181,8 @@ DESCRIPTION:    This function will print the iniitial ls -l kind of list of curr
 */
 
 unsigned long initialLS(){
-
+        ioctl(0, TIOCGWINSZ, &w);
+        windLine=w.ws_row;
 		unsigned long totalfiles;	
         //struct dirent *pDirent;
         DIR *pDir;
@@ -188,10 +191,7 @@ unsigned long initialLS(){
         pDir = openDirectory(rootPath);
         getFileList(pDir);
         totalfiles=Flist.size();        
-        for (vector<string>::iterator iDirentName = Flist.begin(); iDirentName != Flist.end(); ++iDirentName)
-        {
- 			printStatInfo(getStatInfo(rootPath,*iDirentName),*iDirentName);
-        }
+        printFilesWinDependent(0,windLine-1,rootPath);
         closedir (pDir);
         return totalfiles;
 
@@ -274,7 +274,14 @@ void printStatInfo(struct stat info, string fName){
     per+=((mode & S_IWOTH) ? "w" : "-");
     per+=((mode & S_IXOTH) ? "x" : "-");
     //SIZE TO BE HUMAN READABLE
-    cout<<per<<"\t"<<pswd->pw_name<<"\t"<<grp->gr_name<<"\t"<<info.st_size<<"\t"<<(string(asctime(gmtime(&(info.st_mtime))))).substr(0,24)<<"\t"<<fName;
+    string time=(string(asctime(gmtime(&(info.st_mtime))))).substr(0,24);
+    printf("%7s",per.c_str());
+    printf("  %7s",pswd->pw_name);
+    printf("  %7s",grp->gr_name);
+    printf("  %7ld",info.st_size);
+    printf("  %s",fName.c_str());
+    //commented bcz of spacing issue
+    //cout<<per<<"\t"<<pswd->pw_name<<"\t"<<grp->gr_name<<"\t"<<info.st_size<<"\t"<<setw(10)<<fName;
     cout<<endl; 
 }
 

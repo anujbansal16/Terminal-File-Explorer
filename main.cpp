@@ -15,11 +15,15 @@ COPYRIGHT PROTECTED
 #include"listDir.h"
 #include"utility.h"
 #include<iostream>
+#include <sys/ioctl.h>
 using namespace std;
 
 extern vector<string> Flist;
 int main(){	
 	int c;
+    //struct winsize w;	
+	//ioctl(0, TIOCGWINSZ, &w);
+	//printf ("lines %d\n", w.ws_row);
 	bool isCommand=false;
 	unsigned long totalfiles,currLine=1;
 	clearConsole();
@@ -58,7 +62,7 @@ int main(){
 
 			}
 			else if(c==10){
-
+				//cout<<currLine;
 				long returnValue=enterDirectory(currLine);
 				if(returnValue!=-1){
 					cursorMove(1,1);	
@@ -66,7 +70,6 @@ int main(){
 					totalfiles=returnValue;
 				}
 			}
-
 			else if( c==':'){
 				isCommand=true;
 				//cursorMove(totalfiles+2,1);
@@ -76,6 +79,7 @@ int main(){
 		    	cursorMove(totalfiles+1,1);
 		        break;
 		    }
+		    //cout<<totalfiles;
 		}
 	///////////////////////////Normal Mode End////////////////////////////
 		else{

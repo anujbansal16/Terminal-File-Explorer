@@ -15,9 +15,11 @@ map <string,bool> fileToISDirecMap; //filename mapping to boolean to determine i
 
 void printFilesWinDependent(unsigned long firstIndex,unsigned long lastIndex,string path){
         //0-41
+        clearConsole();
+        //to print files current directory path need to be on the top of the stacbackHistory
         for(unsigned long i=firstIndex;i<lastIndex&&i<Flist.size();i++){
             string s=Flist[i];
-            printStatInfo(getStatInfo((path),s),s);    
+            printStatInfo(getStatInfo(stackBackHistory.back(),s),s);    
         }
 }
 
@@ -28,25 +30,18 @@ DESCRIPTION:    Update the name of file and fetches visited directory files on r
 RETURN:         number of files present in the previous directory
 */
 unsigned long forwardDirect(){
-    ioctl(0, TIOCGWINSZ, &w);
     unsigned long totalfiles=Flist.size();
     //check if forward stack is empty
     if(!(stackForwardHistory.empty())){
-        //create path from backhistory stack
-        string currentpath="";
-        for (vector<string>::iterator i= stackBackHistory.begin(); i != stackBackHistory.end(); ++i){
-                currentpath+=*i;
-        }
         //forward traverse directory should be popped out and will pushed in back history stack
-        string nextPath=stackForwardHistory.back();
+        string path=stackForwardHistory.back();
         stackForwardHistory.pop_back();
-        stackBackHistory.push_back(nextPath);
-
-        DIR * pDir = openDirectory((currentpath+nextPath).c_str());
+        stackBackHistory.push_back(path);
+        DIR * pDir = openDirectory(path.c_str());
         getFileList(pDir);
         totalfiles=Flist.size();
-        clearConsole();
-        printFilesWinDependent(0,windLine-1,currentpath+nextPath);
+        printFilesWinDependent(0,windLine-1,path);
+        //cout<<path<<endl;
         closedir (pDir);
         }
         
@@ -60,24 +55,31 @@ DESCRIPTION:    Update the name of file and fetches previous directory files on 
 RETURN:         number of files present in the previous directory
 */
 
+unsigned long backspace(){
+    return backDirect();
+}
+
+
 unsigned long backDirect(){
     unsigned long totalfiles=Flist.size();
     //check if we are at root ie './''
-    if((stackBackHistory.back().compare("./")!=0)){
+    //if((stackBackHistory.back().compare("./")!=0)){
+    if((stackBackHistory.size()!=1)){
         string path;
         //push the directory from where we are going back for forward traversing
         stackForwardHistory.push_back(stackBackHistory.back());
         //take the current directory out to go back on previous directory
-        stackBackHistory.pop_back();    
-        for (vector<string>::iterator i= stackBackHistory.begin(); i != stackBackHistory.end(); ++i){
-            path+=*i;
-        }
+        stackBackHistory.pop_back();
+        path=stackBackHistory.back();    
+        //for (vector<string>::iterator i= stackBackHistory.begin(); i != stackBackHistory.end(); ++i){
+        //    path+=*i;
+        //}
 
         DIR * pDir = openDirectory(path.c_str());
         getFileList(pDir);
         totalfiles=Flist.size();
-        clearConsole();
         printFilesWinDependent(0,windLine-1,path);
+        //cout<<path<<endl;
         closedir (pDir);
 
     }
@@ -126,43 +128,47 @@ RETURN:         number of files(if directory) | -1 (if regular file)
 */
 
 long enterDirectory(unsigned long indexOfFile){
-    string path="";//path of the parent directory of directory we are entering
     unsigned long totalfiles;
-
-    //appending strings from stack to get full path
-    for (vector<string>::iterator i= stackBackHistory.begin(); i != stackBackHistory.end(); ++i){
-        path+=*i;
-    }
     string fName=Flist[indexOfFile-1];  //name of the file or directory
-    
-    if((stackBackHistory.back().compare("./")==0)){
+    //chck if we are in root directory and enterning ..
+    struct stat info1;struct stat info2;
+    stat("./..",&info1);stat((stackBackHistory.back()+fName).c_str(),&info2);
+    if(info1.st_dev==info2.st_dev&&info1.st_ino==info2.st_ino){
+    //if((stackBackHistory.back().compare("./")==0)){
         //controlling enter press on .. in root directory
         if(fName.compare("..")==0){
             fName=".";
         }
-        //clearing forward history once we are at root
-        stackForwardHistory.clear();
+        //clearing forward history once we are at root and clicking on sibling directory
+        //if(fileToISDirecMap.find(fName)!=fileToISDirecMap.end())
+          //  if(fileToISDirecMap[fName]&&(fName.compare(".")!=0)&&(fName.compare("..")!=0))
+            //    stackForwardHistory.clear();
     }
-        
-    string filePath=path+fName+"/";//makeing relative path
-
+    string filePath=stackBackHistory.back()+fName+"/";//format - ./dirname/
     //Check if file is directory and push its name in stack
     if(fileToISDirecMap.find(fName)!=fileToISDirecMap.end()){
         if(fileToISDirecMap[fName]){
-            DIR * pDir = openDirectory(filePath.c_str());
-            getFileList(pDir);
             if(fName.compare(".")==0);//no push pop in case filename is .
             else if(fName.compare("..")==0){//pop out the last directory name from stack
-                stackForwardHistory.push_back(stackBackHistory.back());
+                //stackForwardHistory.push_back(stackBackHistory.back());
+                /*string currDir=stackBackHistory.back();
                 stackBackHistory.pop_back();
+                string parent=stackBackHistory.back();
+                stackBackHistory.push_back(currDir);
+                stackBackHistory.push_back(parent);*/
+                stackBackHistory.push_back(stackBackHistory.back()+fName+"/");//format - ./dirname/
             }
-            else//keep pusing directory names
-                stackBackHistory.push_back(fName+"/");//format - dirname/
+            else//push the complete absolute path of current directory
+                stackBackHistory.push_back(stackBackHistory.back()+fName+"/");//format - ./dirname/
+
+            filePath=stackBackHistory.back();//format - ./dirname/
+            DIR * pDir = openDirectory(filePath.c_str());
+            getFileList(pDir);
             totalfiles=Flist.size();
             //cout<<totalfiles;    
-            clearConsole();
             //cout<<filePath<<endl;
             printFilesWinDependent(0,windLine-1,filePath);
+            //cout<<filePath<<endl;
             closedir (pDir);
         }
     }
@@ -187,6 +193,7 @@ unsigned long initialLS(){
         //struct dirent *pDirent;
         DIR *pDir;
         const char* rootPath="./";
+        //stach ./
         stackBackHistory.push_back(rootPath);
         pDir = openDirectory(rootPath);
         getFileList(pDir);
@@ -211,7 +218,6 @@ DIR * openDirectory(const char* s){
             perror(strerror(errno));
             //exit(1);
     }
-    //cout<<readdir(pDir)->d_name;
     return pDir;
 }
 

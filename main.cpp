@@ -19,10 +19,35 @@ COPYRIGHT PROTECTED
 using namespace std;
 
 extern vector<string> Flist;
+struct winsize w1;		
+unsigned long windLine1;
+unsigned long lastIndex;
+
+void scrollDown( unsigned long currLine,unsigned long totalfiles){
+	if(currLine==lastIndex){
+		lastIndex++;
+		printFilesWinDependent(currLine-windLine1+1,currLine,"");
+		cursorMove(windLine1-1,1);
+	}
+	else
+		cursorDown(1);
+}
+void scrollUp(unsigned long currLine,unsigned long totalfiles){
+	if(currLine<lastIndex-windLine1+1){
+		lastIndex--;
+		printFilesWinDependent(currLine-1,currLine+windLine1-2,"");
+		cursorMove(1,1);
+	}
+	else
+		  cursorUp(1);
+}
+
 int main(){	
 	int c;
     //struct winsize w;	
-	//ioctl(0, TIOCGWINSZ, &w);
+	ioctl(0, TIOCGWINSZ, &w1);
+	windLine1=w1.ws_row;
+	lastIndex=windLine1;
 	//printf ("lines %d\n", w.ws_row);
 	bool isCommand=false;
 	unsigned long totalfiles,currLine=1;
@@ -40,20 +65,22 @@ int main(){
 				    switch(getch()) { // the real value
 				        case 'A':
 				            if(currLine<=1) continue;
-				            cursorUp(1);
 				            currLine--;
+				            scrollUp(currLine,totalfiles);
 				            break;
 				        case 'B':
 				        	if(currLine>=totalfiles) continue;
-				            cursorDown(1);
 				            currLine++;
+				            scrollDown(currLine,totalfiles);
 				            break;
 				        case 'C':
+				        	lastIndex=windLine1;
 				            totalfiles=forwardDirect();
 				            currLine=1;
 				            cursorMove(1,1);
 				            break;
 				        case 'D':
+				        	lastIndex=windLine1;
 				            totalfiles=backDirect();
 				            currLine=1;
 				            cursorMove(1,1);
@@ -61,14 +88,28 @@ int main(){
 				    }
 
 			}
+			//enter
 			else if(c==10){
-				//cout<<currLine;
+				//cout<<" "<<currLine;
 				long returnValue=enterDirectory(currLine);
 				if(returnValue!=-1){
+					lastIndex=windLine1;
 					cursorMove(1,1);	
 					currLine=1;	
 					totalfiles=returnValue;
 				}
+			}
+			//backspace
+			else if(c==127){
+				totalfiles=backspace();
+	            currLine=1;	
+	            cursorMove(1,1);
+			}
+			//h
+			else if(c==104){
+				//totalfiles=homeDirect();
+	            currLine=1;	
+	            cursorMove(1,1);
 			}
 			else if( c==':'){
 				isCommand=true;
@@ -79,6 +120,7 @@ int main(){
 		    	cursorMove(totalfiles+1,1);
 		        break;
 		    }
+		    
 		    //cout<<totalfiles;
 		}
 	///////////////////////////Normal Mode End////////////////////////////
@@ -100,6 +142,7 @@ int main(){
     //printf("Done.\n");
 	return 0;
 }
+
 
 
 

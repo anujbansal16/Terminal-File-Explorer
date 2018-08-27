@@ -27,5 +27,6 @@ void cursorBackward(int columns);
 void clearConsole();
 void cursorMove(int line, int column);
 void clearLine();
+void printHumanReadableSize(long size);
 #endif 
 

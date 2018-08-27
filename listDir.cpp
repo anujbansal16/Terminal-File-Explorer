@@ -43,9 +43,10 @@ unsigned long forwardDirect(){
         printFilesWinDependent(0,windLine-1,path);
         //cout<<path<<endl;
         closedir (pDir);
-        }
-        
         return totalfiles;
+        }
+        //nothing in stack
+        return 0;
 
 }
 
@@ -56,9 +57,27 @@ RETURN:         number of files present in the previous directory
 */
 
 unsigned long backspace(){
-    return backDirect();
+    string fName="..";string filePath;
+    struct stat info1;struct stat info2;
+    stat("./..",&info1);stat((stackBackHistory.back()+fName).c_str(),&info2);
+    if(info1.st_dev==info2.st_dev&&info1.st_ino==info2.st_ino){
+        filePath="./";
+    }
+    else{
+        stackBackHistory.push_back(stackBackHistory.back()+".."+"/");//format - ./dirname/
+        filePath=stackBackHistory.back();//format - ./dirname/
+    }
+    DIR * pDir = openDirectory(filePath.c_str());
+    getFileList(pDir);
+    unsigned long totalfiles=Flist.size();
+    printFilesWinDependent(0,windLine-1,filePath);
+    closedir (pDir);
+    return totalfiles;
 }
 
+unsigned long goHome(){
+        return initialLS();
+}
 
 unsigned long backDirect(){
     unsigned long totalfiles=Flist.size();
@@ -81,9 +100,10 @@ unsigned long backDirect(){
         printFilesWinDependent(0,windLine-1,path);
         //cout<<path<<endl;
         closedir (pDir);
-
+        return totalfiles;
     }
-    return totalfiles;
+    //Nothing in stack
+    return 0;
     
 }
 
@@ -187,6 +207,8 @@ DESCRIPTION:    This function will print the iniitial ls -l kind of list of curr
 */
 
 unsigned long initialLS(){
+        stackBackHistory.clear();
+        stackForwardHistory.clear();
         ioctl(0, TIOCGWINSZ, &w);
         windLine=w.ws_row;
 		unsigned long totalfiles;	
@@ -284,8 +306,10 @@ void printStatInfo(struct stat info, string fName){
     printf("%7s",per.c_str());
     printf("  %7s",pswd->pw_name);
     printf("  %7s",grp->gr_name);
-    printf("  %7ld",info.st_size);
-    printf("  %s",fName.c_str());
+    //printf("  %7ld",info.st_size);
+    printHumanReadableSize(info.st_size);
+    printf("     %s",fName.c_str());
+
     //commented bcz of spacing issue
     //cout<<per<<"\t"<<pswd->pw_name<<"\t"<<grp->gr_name<<"\t"<<info.st_size<<"\t"<<setw(10)<<fName;
     cout<<endl; 

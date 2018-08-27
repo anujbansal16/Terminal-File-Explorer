@@ -50,7 +50,7 @@ int main(){
 	lastIndex=windLine1;
 	//printf ("lines %d\n", w.ws_row);
 	bool isCommand=false;
-	unsigned long totalfiles,currLine=1;
+	unsigned long totalfiles,currLine=1,temp;
 	clearConsole();
 	totalfiles=initialLS(); //this is loading the directory from current root
     printf("Press Q to quit.\n");
@@ -74,16 +74,25 @@ int main(){
 				            scrollDown(currLine,totalfiles);
 				            break;
 				        case 'C':
-				        	lastIndex=windLine1;
-				            totalfiles=forwardDirect();
-				            currLine=1;
-				            cursorMove(1,1);
+				            temp=forwardDirect();
+				            //if stack is empty temp=0 then dont change the configuration
+				            if(temp!=0){
+				            	lastIndex=windLine1;
+				            	totalfiles=temp;
+				            	currLine=1;
+				            	cursorMove(1,1);	
+				            }
+				            
 				            break;
 				        case 'D':
-				        	lastIndex=windLine1;
-				            totalfiles=backDirect();
-				            currLine=1;
-				            cursorMove(1,1);
+				        	//if stack is empty temp=0 dont change the configuration
+							temp=backDirect();
+				        	if(temp!=0){
+				            	lastIndex=windLine1;
+				            	totalfiles=temp;
+				            	currLine=1;
+				            	cursorMove(1,1);	
+				            }
 				            break;
 				    }
 
@@ -107,7 +116,7 @@ int main(){
 			}
 			//h
 			else if(c==104){
-				//totalfiles=homeDirect();
+				totalfiles=goHome();
 	            currLine=1;	
 	            cursorMove(1,1);
 			}

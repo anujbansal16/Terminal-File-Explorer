@@ -32,5 +32,6 @@ unsigned long backDirect();
 unsigned long forwardDirect();
 void printFilesWinDependent(unsigned long firstIndex,unsigned long lastIndex,string path);
 unsigned long backspace();
+unsigned long goHome();
 
 #endif

@@ -7,7 +7,8 @@ COPYRIGHT PROTECTED
 #include"listDir.h"
 
 vector<string> Flist;
-struct winsize w;   
+struct winsize w;
+unsigned long tailOmit=1;
 unsigned long windLine;
 vector<string> stackBackHistory; // ./|dir1/|dir2|
 vector<string> stackForwardHistory;// dir1|dir2|
@@ -40,7 +41,7 @@ unsigned long forwardDirect(){
         DIR * pDir = openDirectory(path.c_str());
         getFileList(pDir);
         totalfiles=Flist.size();
-        printFilesWinDependent(0,windLine-1,path);
+        printFilesWinDependent(0,windLine-tailOmit,path);
         //cout<<path<<endl;
         closedir (pDir);
         return totalfiles;
@@ -70,7 +71,7 @@ unsigned long backspace(){
     DIR * pDir = openDirectory(filePath.c_str());
     getFileList(pDir);
     unsigned long totalfiles=Flist.size();
-    printFilesWinDependent(0,windLine-1,filePath);
+    printFilesWinDependent(0,windLine-tailOmit,filePath);
     closedir (pDir);
     return totalfiles;
 }
@@ -97,7 +98,7 @@ unsigned long backDirect(){
         DIR * pDir = openDirectory(path.c_str());
         getFileList(pDir);
         totalfiles=Flist.size();
-        printFilesWinDependent(0,windLine-1,path);
+        printFilesWinDependent(0,windLine-tailOmit,path);
         //cout<<path<<endl;
         closedir (pDir);
         return totalfiles;
@@ -194,7 +195,7 @@ long enterDirectory(unsigned long indexOfFile){
             totalfiles=Flist.size();
             //cout<<totalfiles;    
             //cout<<filePath<<endl;
-            printFilesWinDependent(0,windLine-1,filePath);
+            printFilesWinDependent(0,windLine-tailOmit,filePath);
             //cout<<filePath<<endl;
             closedir (pDir);
         }
@@ -227,7 +228,7 @@ unsigned long initialLS(){
         pDir = openDirectory(rootPath);
         getFileList(pDir);
         totalfiles=Flist.size();        
-        printFilesWinDependent(0,windLine-1,rootPath);
+        printFilesWinDependent(0,windLine-tailOmit,rootPath);
         closedir (pDir);
         return totalfiles;
 
@@ -244,7 +245,7 @@ DIR * openDirectory(const char* s){
     DIR *pDir;
     pDir = opendir(s);
     if (pDir == NULL) {
-            perror(strerror(errno));
+            cout<<" "<<(strerror(errno));
             //exit(1);
     }
     return pDir;

@@ -14,6 +14,7 @@ COPYRIGHT PROTECTED
 #include <sys/syscall.h>
 #include"listDir.h"
 #include"utility.h"
+#include"commandModeOperations.h"
 #include<iostream>
 #include <sys/ioctl.h>
 using namespace std;
@@ -33,6 +34,10 @@ void scrollUp(unsigned long currLine,unsigned long totalfiles);
 void normalMode();
 void commandMode();
 
+enum CommandState isCommandSuccess;
+long n=0;
+char inputBuffer[MAX_BUFFER];
+
 int main(){	
 	ioctl(0, TIOCGWINSZ, &w1);
 	windLine1=w1.ws_row;
@@ -49,6 +54,7 @@ int main(){
 		}
 	///////////////////////////Normal Mode End////////////////////////////
 		else{
+
 			commandMode();
 		}	
 	    
@@ -164,8 +170,8 @@ void normalMode(){
 	else if( c==K_COLON){
 		isCommand=true;
 		//cursorMove(totalfiles+2,1);
-		cursorMove(1000,1);
-		printf("COMMAND MODE:");
+		//cursorMove(1000,1);
+		printCommandMode();
 	}
 	//q
 	else if ( c == K_Q || c == K_q){
@@ -181,21 +187,40 @@ void commandMode(){
     	//currLine=1;
     	//moving cursor to position it was there in normal mode
     	cursorMove(cursorPos,1);
+    	n=0;
+    	isCommandSuccess=SUCCESS_GOTO;
     }
     //backspace
 	else if(c==K_BACKSPACE){
-		
+		if(n!=0){
+			inputBuffer[n]='\0';
+			n--;
+			printCommandMode();
+			printInputBuffer(inputBuffer,n);
+		}
+
 	}
 	//enter
 	else if(c==K_ENTER){
-		clearLine();
-    	isCommand=!isCommand;	
-    	//moving cursor to position it was there in normal mode
-    	cursorMove(cursorPos,1);
+		printCommandMode();
+		isCommandSuccess =operateCommands(inputBuffer,n);
+		if(isCommandSuccess==SUCCESS_GOTO){
+			totalfiles=Flist.size();
+			resetCursor(currLine);
+			printCommandMode();
+		}
+		memset(inputBuffer,'\0',sizeof(inputBuffer));
+		n=0;
 	}
 
     else{
-	        	printf("%c",c );
+    	//blank enter or blank spaces
+    	if(isCommandSuccess==FAILURE){
+    		printCommandMode();
+    		isCommandSuccess=SUCCESS_GOTO;
+    	}
+	    printf("%c",c);
+	    inputBuffer[n++]=c;
     }	
 }
 

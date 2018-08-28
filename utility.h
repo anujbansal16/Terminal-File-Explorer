@@ -21,7 +21,14 @@ COPYRIGHT PROTECTED
 #define K_Q 'Q'
 #define K_BACKSPACE 127
 #define K_ENTER 10
+#define K_SPACE 10
+#define MAX_BUFFER 2000
+#define COPY "copy"
+#define MOVE "move"
+#define RENAME "rename"
+#define GOTO "goto"
 
+using namespace std;
 
 #ifndef INC_UTILITY_H
 #define INC_UTILITY_H
@@ -36,5 +43,9 @@ void clearConsole();
 void cursorMove(int line, int column);
 void clearLine();
 void printHumanReadableSize(long size);
+void printInputBuffer(char inputBuffer[],long n);
+void printCommandMode();
+vector<string> tokenize(char inputBuffer[], string token);
+enum CommandState {FAILURE,SUCCESS_GOTO,SUCCESS_COPY};
 #endif 
 

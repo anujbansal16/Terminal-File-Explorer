@@ -79,9 +79,24 @@ void printHumanReadableSize(long size)
   if (size >= Pb && size < Eb)
     printf("  %7.2fPb",1.0*size/Pb);  
 }
-
-
-
+void printInputBuffer(char inputBuffer[], long n){
+  for (long i=0;i<n;i++)
+      printf("%c", inputBuffer[i]);
+}
+void printCommandMode(){
+  cursorMove(1000,1);
+  clearLine();    
+  printf("COMMAND MODE :");
+}
+vector<string> tokenize(char inputBuffer[], string token){
+  vector<string> words;
+    char* word = strtok(inputBuffer, token.c_str());
+    while (word != NULL) {
+        words.push_back(word);
+        word = strtok(NULL, token.c_str());
+    }
+    return words;
+}
   
 
 

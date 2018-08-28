@@ -14,13 +14,13 @@ COPYRIGHT PROTECTED
 #include <pwd.h>
 #include <grp.h>
 #include <sys/ioctl.h>
-#include"utility.h"
+#include "utility.h"
+#include "listDir.h"
 using namespace std;
 
-
-#ifndef INC_COMMANDMODEOPERATIONS_H;
+#ifndef INC_COMMANDMODEOPERATIONS_H
 #define INC_COMMANDMODEOPERATIONS_H
-
-
-
+enum CommandState execute(vector<string> words);
+enum CommandState operateCommands(char inputBuffer[],long n);
+enum CommandState gotoDirectory(string directory);
 #endif

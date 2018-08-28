@@ -149,14 +149,16 @@ void normalMode(){
 	//backspace
 	else if(c==K_BACKSPACE){
 		totalfiles=backspace();
-        currLine=1;	
-        cursorMove(1,1);
+        //currLine=1;	
+        //cursorMove(1,1);
+        resetCursor(currLine);
 	}
 	//h
 	else if(c==K_H || c==K_h ){
 		totalfiles=goHome();
-        currLine=1;	
-        cursorMove(1,1);
+        //currLine=1;	
+        //cursorMove(1,1);
+        resetCursor(currLine);
 	}
 	//:
 	else if( c==K_COLON){
@@ -187,7 +189,7 @@ void commandMode(){
 	//enter
 	else if(c==K_ENTER){
 		clearLine();
-    	isCommand=!isCommand;
+    	isCommand=!isCommand;	
     	//moving cursor to position it was there in normal mode
     	cursorMove(cursorPos,1);
 	}

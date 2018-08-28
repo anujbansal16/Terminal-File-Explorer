@@ -5,6 +5,7 @@ ROLLNO. 2018201096
 COPYRIGHT PROTECTED
 ***********************************************************/
 #include"listDir.h"
+
 vector<string> Flist;
 struct winsize w;   
 unsigned long windLine;
@@ -179,8 +180,13 @@ long enterDirectory(unsigned long indexOfFile){
                 stackBackHistory.push_back(parent);*/
                 stackBackHistory.push_back(stackBackHistory.back()+fName+"/");//format - ./dirname/
             }
-            else//push the complete absolute path of current directory
+            else{//push the complete absolute path of current directory
+                //clear the forward stack when moving to different directory from root
+                if((stackBackHistory.size()==1)){
+                       stackForwardHistory.clear();
+                }
                 stackBackHistory.push_back(stackBackHistory.back()+fName+"/");//format - ./dirname/
+            }
 
             filePath=stackBackHistory.back();//format - ./dirname/
             DIR * pDir = openDirectory(filePath.c_str());

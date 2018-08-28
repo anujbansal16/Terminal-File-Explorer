@@ -9,11 +9,19 @@ COPYRIGHT PROTECTED
 #include <signal.h>
 #include <termios.h>
 #include <signal.h>
-#define ESC '\033'
+#define K_ESC '\033'
 #define K_UP 'A'
 #define K_DOWN 'B'
 #define K_RIGHT 'C'
 #define K_LEFT 'D'
+#define K_COLON ':'
+#define K_h 'h'
+#define K_H 'H'
+#define K_q 'q'
+#define K_Q 'Q'
+#define K_BACKSPACE 127
+#define K_ENTER 10
+
 
 #ifndef INC_UTILITY_H
 #define INC_UTILITY_H

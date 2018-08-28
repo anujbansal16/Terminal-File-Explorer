@@ -1,7 +1,7 @@
 CC = g++
 CFLAGS = -Wall -std=c++0x
-DEPS = listDir.h utility.h
-OBJ = main.o listDir.o utility.o
+DEPS = listDir.h utility.h commandModeOperations.h
+OBJ = main.o listDir.o utility.o commandModeOperations.cpp
 %.o: %.cpp $(DEPS)
 	$(CC) $(CFLAGS) -c -o $@ $<
 

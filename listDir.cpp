@@ -5,7 +5,6 @@ ROLLNO. 2018201096
 COPYRIGHT PROTECTED
 ***********************************************************/
 #include"listDir.h"
-#include <sys/wait.h>
 vector<string> Flist;
 struct winsize w;   
 unsigned long windLine;

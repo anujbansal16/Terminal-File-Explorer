@@ -14,6 +14,7 @@ COPYRIGHT PROTECTED
 #include <pwd.h>
 #include <grp.h>
 #include <sys/ioctl.h>
+#include <sys/wait.h>
 #include"utility.h"
 using namespace std;
 

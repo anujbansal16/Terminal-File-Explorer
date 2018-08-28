@@ -114,6 +114,8 @@ PARAMETERS:     path of file
 */
 
 void openFile(string filePath){
+    //redirecting errors to a file
+    freopen("error.txt", "w", stderr);
     pid_t pid = fork();
     int status;
     if (pid == -1){

@@ -204,10 +204,11 @@ void commandMode(){
 	else if(c==K_ENTER){
 		printCommandMode();
 		isCommandSuccess =operateCommands(inputBuffer,n);
-		if(isCommandSuccess==SUCCESS_GOTO){
+		if(isCommandSuccess==SUCCESS_GOTO||isCommandSuccess==SUCCESS_DIR_CREATED){
 			totalfiles=Flist.size();
 			resetCursor(currLine);
 			printCommandMode();
+
 		}
 		memset(inputBuffer,'\0',sizeof(inputBuffer));
 		n=0;

@@ -311,12 +311,12 @@ void printStatInfo(struct stat info, string fName){
     per+=((mode & S_IXOTH) ? "x" : "-");
     //SIZE TO BE HUMAN READABLE
     string time=(string(asctime(gmtime(&(info.st_mtime))))).substr(0,24);
-    printf("%7s",per.c_str());
-    printf("  %7s",pswd->pw_name);
-    printf("  %7s",grp->gr_name);
-    //printf("  %7ld",info.st_size);
+    printf("%4s",per.c_str());
+    printf(" %4s",pswd->pw_name);
+    printf(" %4s",grp->gr_name);
+    printf(" %4s",time.c_str());
     printHumanReadableSize(info.st_size);
-    printf("     %s",fName.c_str());
+    printf(" %13s",fName.c_str());
 
     //commented bcz of spacing issue
     //cout<<per<<"\t"<<pswd->pw_name<<"\t"<<grp->gr_name<<"\t"<<info.st_size<<"\t"<<setw(10)<<fName;
@@ -326,7 +326,6 @@ void printStatInfo(struct stat info, string fName){
 
 /*
 
-AUTHOR: ANUJ
 DESCRIPTION:    This function will print the header information of file listed
 
 */

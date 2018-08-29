@@ -27,6 +27,9 @@ COPYRIGHT PROTECTED
 #define MOVE "move"
 #define RENAME "rename"
 #define GOTO "goto"
+#define GOTO "goto"
+#define CREATE_DIR "create_dir"
+
 
 using namespace std;
 
@@ -46,6 +49,6 @@ void printHumanReadableSize(long size);
 void printInputBuffer(char inputBuffer[],long n);
 void printCommandMode();
 vector<string> tokenize(char inputBuffer[], string token);
-enum CommandState {FAILURE,SUCCESS_GOTO,SUCCESS_COPY};
+enum CommandState {FAILURE,SUCCESS_GOTO,SUCCESS_DIR_CREATED};
 #endif 
 

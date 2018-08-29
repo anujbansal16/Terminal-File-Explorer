@@ -310,7 +310,8 @@ void printStatInfo(struct stat info, string fName){
     per+=((mode & S_IWOTH) ? "w" : "-");
     per+=((mode & S_IXOTH) ? "x" : "-");
     //SIZE TO BE HUMAN READABLE
-    string time=(string(asctime(gmtime(&(info.st_mtime))))).substr(0,24);
+    //string time=(string(asctime(gmtime(&(info.st_mtime))))).substr(0,24);
+    string time=((string)ctime(&info.st_mtime)).substr(0,24);
     printf("%4s",per.c_str());
     printf(" %4s",pswd->pw_name);
     printf(" %4s",grp->gr_name);

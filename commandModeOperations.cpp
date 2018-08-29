@@ -41,8 +41,11 @@ enum CommandState execute(vector<string> words){
         else
         	cout<<" Too many few arguments for "<<CREATE_DIR;
 	}
-	else if(opcode==MOVE){
-		
+	else if(opcode==CREATE_FILE){
+		if(words.size()==3)
+        	return createFile(words[1],words[2]);
+        else
+        	cout<<" Too many few arguments for "<<CREATE_FILE;
 	}
 	else if(opcode==RENAME){
 		
@@ -97,6 +100,7 @@ enum CommandState createDirectory(string dirName,string path){
     //created
     if (!isNotCreated){
 		pDir = openDirectory(stackBackHistory.back().c_str());
+		//load current directory again
 		if(pDir==NULL)
 			return FAILURE;
 		getFileList(pDir);
@@ -109,5 +113,32 @@ enum CommandState createDirectory(string dirName,string path){
         cout<<" Unable to create directory "<<strerror(errno);
         return FAILURE;
     }
+ 
+}
+enum CommandState createFile(string fileName,string path){
+    DIR *pDir;
+    if(path==".")
+    	path=stackBackHistory.back();
+    else//file in given path
+    	path="."+path.substr(1,path.size())+"/";
+    struct stat info;
+    //if directory already exist?
+    if (stat(path.c_str(), &info) != -1) {
+   		if (S_ISDIR(info.st_mode)) {
+			fopen ((path+fileName).c_str(),"w+");
+			//load current directory again
+			pDir = openDirectory(stackBackHistory.back().c_str());
+			if(pDir==NULL)
+				return FAILURE;
+			getFileList(pDir);
+			printFilesWinDependent(0,windLine-tailOmit,"");
+			closedir(pDir);
+   		}
+   		return SUCCESS_DIR_CREATED;
+	}
+	else{
+		cout<<"Can't create the file.Directory doesn't exist ";
+		return FAILURE;
+	}
  
 }

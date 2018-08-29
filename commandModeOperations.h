@@ -24,4 +24,5 @@ enum CommandState execute(vector<string> words);
 enum CommandState operateCommands(char inputBuffer[],long n);
 enum CommandState gotoDirectory(string directory);
 enum CommandState createDirectory(string dirName,string path);
+enum CommandState createFile(string fileName,string path);
 #endif

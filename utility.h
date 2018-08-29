@@ -29,6 +29,7 @@ COPYRIGHT PROTECTED
 #define GOTO "goto"
 #define GOTO "goto"
 #define CREATE_DIR "create_dir"
+#define CREATE_FILE "create_file"
 
 
 using namespace std;
@@ -49,6 +50,6 @@ void printHumanReadableSize(long size);
 void printInputBuffer(char inputBuffer[],long n);
 void printCommandMode();
 vector<string> tokenize(char inputBuffer[], string token);
-enum CommandState {FAILURE,SUCCESS_GOTO,SUCCESS_DIR_CREATED};
+enum CommandState {FAILURE,SUCCESS_GOTO,SUCCESS_DIR_CREATED,SUCCESS_FILE_CREATED};
 #endif 
 

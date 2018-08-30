@@ -56,6 +56,13 @@ enum CommandState execute(vector<string> words){
         else
         	cout<<" Too many few arguments for "<<DELETE_DIR;
 	}
+
+	else if(opcode==DELETE_FILE){
+		if(words.size()==2)
+        	return deleteFile(words[1]);
+        else
+        	cout<<" Too many few arguments for "<<DELETE_FILE;
+	}
 	
 	return FAILURE;
 }
@@ -174,6 +181,31 @@ enum CommandState deleteDir(string path){
 		return SUCCESS_DIR_DELETED;
    	}
    	//not deleted if not a directory or directory not found
+   	else
+   	{   
+   		cout<<" Error: "<<strerror(errno);
+        return FAILURE;
+   	}
+    
+}
+
+enum CommandState deleteFile(string path){
+	int isNotDeleted;
+    DIR *pDir;    
+    path=stackBackHistory.back()+path;
+    //deleted
+    isNotDeleted = unlink(path.c_str());
+   	if (!isNotDeleted){
+   		pDir = openDirectory(stackBackHistory.back().c_str());
+		//load current directory again
+		if(pDir==NULL)
+			return FAILURE;
+		getFileList(pDir);
+		printFilesWinDependent(0,windLine-tailOmit,"");
+		closedir(pDir);
+		return SUCCESS_FILE_DELETED;
+   	}
+   	
    	else
    	{   
    		cout<<" Error: "<<strerror(errno);

@@ -204,7 +204,7 @@ void commandMode(){
 	else if(c==K_ENTER){
 		printCommandMode();
 		isCommandSuccess =operateCommands(inputBuffer,n);
-		if(isCommandSuccess==SUCCESS_GOTO||isCommandSuccess==SUCCESS_DIR_CREATED||isCommandSuccess==SUCCESS_DIR_DELETED){
+		if(isCommandSuccess==SUCCESS_GOTO||isCommandSuccess==SUCCESS_DIR_CREATED||isCommandSuccess==SUCCESS_DIR_DELETED||isCommandSuccess==SUCCESS_FILE_DELETED){
 			totalfiles=Flist.size();
 			resetCursor(currLine);
 			printCommandMode();

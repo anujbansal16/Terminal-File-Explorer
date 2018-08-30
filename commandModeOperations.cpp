@@ -35,21 +35,28 @@ enum CommandState execute(vector<string> words){
         else
         	cout<<" Too many few arguments for "<<GOTO;
 	}
+
 	else if(opcode==CREATE_DIR){
 		if(words.size()==3)
         	return createDirectory(words[1],words[2]);
         else
         	cout<<" Too many few arguments for "<<CREATE_DIR;
 	}
+
 	else if(opcode==CREATE_FILE){
 		if(words.size()==3)
         	return createFile(words[1],words[2]);
         else
         	cout<<" Too many few arguments for "<<CREATE_FILE;
 	}
-	else if(opcode==RENAME){
-		
+
+	else if(opcode==DELETE_DIR){
+		if(words.size()==2)
+        	return deleteDir(words[1]);
+        else
+        	cout<<" Too many few arguments for "<<DELETE_DIR;
 	}
+	
 	return FAILURE;
 }
 
@@ -142,3 +149,37 @@ enum CommandState createFile(string fileName,string path){
 	}
  
 }
+
+enum CommandState deleteDir(string path){
+	int isNotDeleted;
+    DIR *pDir;    
+    path=stackBackHistory.back()+path;
+    //check if its current working directory
+    struct stat info1;struct stat info2;
+    stat(path.c_str(),&info1);stat((stackBackHistory.back()).c_str(),&info2);
+    if(info1.st_dev==info2.st_dev&&info1.st_ino==info2.st_ino){
+        cout<<" Error: Cant remove working directory ";
+        return FAILURE;
+    }
+    //deleted
+    isNotDeleted = rmdir(path.c_str());
+   	if (!isNotDeleted){
+   		pDir = openDirectory(stackBackHistory.back().c_str());
+		//load current directory again
+		if(pDir==NULL)
+			return FAILURE;
+		getFileList(pDir);
+		printFilesWinDependent(0,windLine-tailOmit,"");
+		closedir(pDir);
+		return SUCCESS_DIR_DELETED;
+   	}
+   	//not deleted if not a directory or directory not found
+   	else
+   	{   
+   		cout<<" Error: "<<strerror(errno);
+        return FAILURE;
+   	}
+    
+}
+
+

@@ -30,6 +30,8 @@ COPYRIGHT PROTECTED
 #define GOTO "goto"
 #define CREATE_DIR "create_dir"
 #define CREATE_FILE "create_file"
+#define DELETE_DIR "delete_dir"
+#define DELETE_FILE "delete_file"
 
 
 using namespace std;
@@ -50,6 +52,7 @@ void printHumanReadableSize(long size);
 void printInputBuffer(char inputBuffer[],long n);
 void printCommandMode();
 vector<string> tokenize(char inputBuffer[], string token);
-enum CommandState {FAILURE,SUCCESS_GOTO,SUCCESS_DIR_CREATED,SUCCESS_FILE_CREATED};
+enum CommandState {FAILURE,SUCCESS_GOTO,SUCCESS_DIR_CREATED,SUCCESS_FILE_CREATED,SUCCESS_DIR_DELETED,SUCCESS_FILE_DELETED};
 #endif 
+
 

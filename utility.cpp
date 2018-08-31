@@ -5,7 +5,8 @@ ROLLNO. 2018201096
 COPYRIGHT PROTECTED
 ***********************************************************/
 #include"utility.h"
-
+int vmin=1;
+int vtime=0;
 int getch() {
       int c=0;
       
@@ -17,6 +18,8 @@ int getch() {
           //---- set new terminal parms --------
       memcpy(&new_opts, &org_opts, sizeof(new_opts));
       new_opts.c_lflag &=~(IXON | IEXTEN);
+      new_opts.c_cc[VTIME]= vtime;    
+      new_opts.c_cc[VMIN]= vmin;
       new_opts.c_lflag &= ~(ICANON | ECHO | ECHOE | ECHOK | ECHONL | ECHOPRT | ECHOKE | ICRNL | ISIG);
       tcsetattr(STDIN_FILENO, TCSANOW, &new_opts);
       c=getchar();

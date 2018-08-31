@@ -20,6 +20,8 @@ COPYRIGHT PROTECTED
 using namespace std;
 //file names vector declared in listDir.cpp
 extern vector<string> Flist;
+extern int vmin;
+extern int vtime;
 struct winsize w1;		
 //43 in full size terminal
 unsigned long windLine1;
@@ -181,7 +183,16 @@ void normalMode(){
 }
 void commandMode(){
 	int c=getch();
-	if(c==K_ESC){
+	vmin=0;
+	vtime=0;
+	int c2=getch();
+	vmin=1;
+	vtime=0;
+	//if c2 is [ than escape it out
+	if(c2==91){
+		getch();
+	}
+	if(c==K_ESC&&c2==-1){
 		clearLine();
     	isCommand=!isCommand;
     	//currLine=1;
@@ -213,15 +224,17 @@ void commandMode(){
 		memset(inputBuffer,'\0',sizeof(inputBuffer));
 		n=0;
 	}
-
     else{
     	//blank enter or blank spaces
     	if(isCommandSuccess==FAILURE){
     		printCommandMode();
     		isCommandSuccess=SUCCESS_GOTO;
     	}
-	    printf("%c",c);
-	    inputBuffer[n++]=c;
+    	if(c2==-1){
+	    	printf("%c",c);
+	    	inputBuffer[n++]=c;
+    	}
+	    
     }	
 }
 

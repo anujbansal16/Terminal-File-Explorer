@@ -215,7 +215,7 @@ void commandMode(){
 	else if(c==K_ENTER){
 		printCommandMode();
 		isCommandSuccess =operateCommands(inputBuffer,n);
-		if(isCommandSuccess==SUCCESS_GOTO||isCommandSuccess==SUCCESS_DIR_CREATED||isCommandSuccess==SUCCESS_DIR_DELETED||isCommandSuccess==SUCCESS_FILE_DELETED||isCommandSuccess==SUCCESS_COPY||isCommandSuccess==SUCCESS_MOVE ||isCommandSuccess==SUCCESS_RENAME){
+		if(isCommandSuccess==SUCCESS_GOTO||isCommandSuccess==SUCCESS_DIR_CREATED||isCommandSuccess==SUCCESS_DIR_DELETED||isCommandSuccess==SUCCESS_FILE_DELETED||isCommandSuccess==SUCCESS_COPY||isCommandSuccess==SUCCESS_MOVE ||isCommandSuccess==SUCCESS_RENAME || isCommandSuccess==SUCCESS_SNAPSHOT){
 			totalfiles=Flist.size();
 			resetCursor(currLine);
 			printCommandMode();

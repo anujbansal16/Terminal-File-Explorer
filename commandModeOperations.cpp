@@ -80,7 +80,13 @@ enum CommandState execute(vector<string> words){
 		if(words.size()==3)
         	return renameF(words[1],words[2]);
         else
-        	cout<<" To many/few few arguments "<<RENAME<<" expecting exactly 2";
+        	cout<<" To many/few few arguments "<<RENAME<<" expecting exactly 3";
+	}
+	else if(opcode==SNAPSHOT){
+		if(words.size()==3)
+        	return snapShotF(words[1],words[2]);
+        else
+        	cout<<" To many/few few arguments "<<RENAME<<" expecting exactly 3";
 	}
 	else{
 		cout<<" Please enter a valid command";
@@ -91,10 +97,15 @@ enum CommandState execute(vector<string> words){
 
 
 enum CommandState renameF(string source,string destination){
-	if((source[0]=='.'|| source[0]=='/') || source[0]=='~'){
+	if( source[0]=='/' || source[0]=='~'){
 		cout<<"Give only the filename in pwd";
 		return FAILURE;
 	}
+	if(destination[0]=='/'){
+		cout<<"New name can not contain /";
+		return FAILURE;
+	}
+
 	struct stat info;
 	string path=stackBackHistory.back()+source;
     int isFileNotExist=stat(path.c_str(),&info);
@@ -539,6 +550,83 @@ void copyFile(string filePath,string destination){
     close(inF);
     close(outF);
 }
+
+enum CommandState snapShotF(string path, string destination){
+	if((path[0]=='.'&&path[1]=='.') || (path[0]=='.'&&path[1]=='/') ){
+		cout<<"Path must start from / or ~ or directoryName not .";
+		return FAILURE;
+	}
+	if(path[0]=='.'){
+		path=stackBackHistory.back();
+	}
+	else if(path[0]=='~'){
+		path=("."+path.substr(1,path.size()-1)+"/");
+	}
+	else if(path[0]=='/'){
+		if(path.size()==1)
+			path="."+path;
+		else
+			path=("."+path+"/");
+	}
+	else{
+		path=stackBackHistory.back()+path+"/";
+	}
+	if(isDirectory(path)){
+		if(destination[0]=='/'){
+			cout<<"Enter a proper dumpfile Name";
+			return FAILURE;
+		}
+		snapRec(path,stackBackHistory.back()+destination);	
+		DIR *pDir = openDirectory(stackBackHistory.back().c_str());
+		//load current directory again
+		if(pDir==NULL)
+			return FAILURE;
+		getFileList(pDir);
+		printFilesWinDependent(0,windLine-tailOmit,"");
+		closedir(pDir);
+		return SUCCESS_SNAPSHOT;
+	}
+	else{
+		cout<<"Error:Not a Directory";
+		return FAILURE;
+	}
+	
+}
+
+void snapRec(string path, string destination){
+	DIR *pDir;
+    struct dirent *pDirent;
+    string fileName, tempSourcePath;
+    stack <string> q;
+    //int outF = open(destination.c_str(), O_APPEND | O_CREAT , 0664);
+	ofstream outFile(destination); 
+	
+	q.push(path);
+	while(!q.empty()){
+		string front=q.top();
+		q.pop();
+		outFile<<front.substr(1,front.size()-1)<<":\n";	
+	    if((pDir=opendir(front.c_str())))
+	    {
+	        while((pDirent=readdir(pDir))!= NULL){
+	            fileName = pDirent->d_name;
+	            if((fileName!=".")&&(fileName!=".."))
+	            {
+	                tempSourcePath = front+fileName;
+	                if (isDirectory(tempSourcePath))
+	                {
+	                    q.push(tempSourcePath+"/");
+	                }
+	                outFile<<fileName<<" ";
+	            }
+
+	        }
+	        outFile<<"\n\n";
+	    }
+	}
+	closedir(pDir);
+}
+
 
 bool isDirectory(string path)
 {

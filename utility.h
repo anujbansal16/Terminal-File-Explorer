@@ -51,7 +51,7 @@ void printHumanReadableSize(long size);
 void printInputBuffer(char inputBuffer[],long n);
 void printCommandMode();
 vector<string> tokenize(char inputBuffer[], string token);
-enum CommandState {FAILURE,SUCCESS_GOTO,SUCCESS_DIR_CREATED,SUCCESS_FILE_CREATED,SUCCESS_DIR_DELETED,SUCCESS_FILE_DELETED,SUCCESS_COPY,SUCCESS_MOVE};
+enum CommandState {FAILURE,SUCCESS_GOTO,SUCCESS_DIR_CREATED,SUCCESS_FILE_CREATED,SUCCESS_DIR_DELETED,SUCCESS_FILE_DELETED,SUCCESS_COPY,SUCCESS_MOVE,SUCCESS_RENAME};
 #endif 
 
 

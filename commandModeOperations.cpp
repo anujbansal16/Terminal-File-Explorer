@@ -33,35 +33,35 @@ enum CommandState execute(vector<string> words){
 		if(words.size()==2)
         	return gotoDirectory(words[1]);
         else
-        	cout<<" Too many few arguments for "<<GOTO<<" expecting exactly 2";;
+        	cout<<" Too many/very few arguments for "<<GOTO<<" expecting exactly 2";;
 	}
 
 	else if(opcode==CREATE_DIR){
 		if(words.size()==3)
         	return createDirectory(words[1],words[2]);
         else
-        	cout<<" Too many few arguments for "<<CREATE_DIR<<" expecting exactly 3";;
+        	cout<<" Too many/very few arguments for "<<CREATE_DIR<<" expecting exactly 3";;
 	}
 
 	else if(opcode==CREATE_FILE){
 		if(words.size()==3)
         	return createFile(words[1],words[2]);
         else
-        	cout<<" Too many few arguments for "<<CREATE_FILE<<" expecting exactly 3";;
+        	cout<<" Too many/very few arguments for "<<CREATE_FILE<<" expecting exactly 3";;
 	}
 
 	else if(opcode==DELETE_DIR){
 		if(words.size()==2)
         	return deleteDir(words[1],false);
         else
-        	cout<<" Too many few arguments for "<<DELETE_DIR<<" expecting exactly 2";
+        	cout<<" Too many/very few arguments for "<<DELETE_DIR<<" expecting exactly 2";
 	}
 
 	else if(opcode==DELETE_FILE){
 		if(words.size()==2)
         	return deleteFile(words[1],false);
         else
-        	cout<<" Too many few arguments for "<<DELETE_FILE<<" expecting exactly 2";
+        	cout<<" Too many/very few arguments for "<<DELETE_FILE<<" expecting exactly 2";
 	}
 
 	else if(opcode==COPY){
@@ -76,6 +76,12 @@ enum CommandState execute(vector<string> words){
         else
         	cout<<" Very few arguments "<<MOVE<<" expecting atleast 3";
 	}
+	else if(opcode==RENAME){
+		if(words.size()==3)
+        	return renameF(words[1],words[2]);
+        else
+        	cout<<" To many/few few arguments "<<RENAME<<" expecting exactly 2";
+	}
 	else{
 		cout<<" Please enter a valid command";
 	}
@@ -84,11 +90,40 @@ enum CommandState execute(vector<string> words){
 }
 
 
+enum CommandState renameF(string source,string destination){
+	if((source[0]=='.'|| source[0]=='/') || source[0]=='~'){
+		cout<<"Give only the filename in pwd";
+		return FAILURE;
+	}
+	struct stat info;
+	string path=stackBackHistory.back()+source;
+    int isFileNotExist=stat(path.c_str(),&info);
+    if(!isFileNotExist){
+    		if(isDirectory(path)){
+    			cout<<"Not a file: Is a Directory";
+        		return FAILURE;		
+    		}
+    		else{
+    			copyFile(path,stackBackHistory.back()+destination);
+    			deleteFile(path,true);
+    		}
+    }
+    else{
+        cout<<" Can't "<<RENAME<<" '"<<source<<"'"<<" : No such file or directory";
+        return FAILURE;
+    }
+	return SUCCESS_RENAME;
+}
+
+
 /*
 AUTHOR:         ANUJ
 DESCRIPTION:    Go to a particular directory given a absolute path must start from /
 RETURN:         status of commands SUCCESS_GOTO or Failure
 */
+
+
+
 enum CommandState gotoDirectory(string directory){
 		/*if(directory=="./"||directory=="/"){
 			initialLS();
@@ -495,7 +530,9 @@ void copyFile(string filePath,string destination){
     char inputB[BUFSIZ];
     size_t size;
     int inF =open(filePath.c_str(),O_RDONLY, 0);
-    int outF = open(destination.c_str(), O_WRONLY | O_CREAT , 0664);
+    struct stat info;
+    stat(filePath.c_str(),&info);
+    int outF = open(destination.c_str(), O_WRONLY | O_CREAT , info.st_mode);
  	 while ((size = read(inF, inputB, BUFSIZ)) > 0) {
         write(outF, inputB, size);
     }

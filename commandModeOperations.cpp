@@ -33,42 +33,45 @@ enum CommandState execute(vector<string> words){
 		if(words.size()==2)
         	return gotoDirectory(words[1]);
         else
-        	cout<<" Too many few arguments for "<<GOTO;
+        	cout<<" Too many few arguments for "<<GOTO<<" expecting exactly 2";;
 	}
 
 	else if(opcode==CREATE_DIR){
 		if(words.size()==3)
         	return createDirectory(words[1],words[2]);
         else
-        	cout<<" Too many few arguments for "<<CREATE_DIR;
+        	cout<<" Too many few arguments for "<<CREATE_DIR<<" expecting exactly 3";;
 	}
 
 	else if(opcode==CREATE_FILE){
 		if(words.size()==3)
         	return createFile(words[1],words[2]);
         else
-        	cout<<" Too many few arguments for "<<CREATE_FILE;
+        	cout<<" Too many few arguments for "<<CREATE_FILE<<" expecting exactly 3";;
 	}
 
 	else if(opcode==DELETE_DIR){
 		if(words.size()==2)
         	return deleteDir(words[1]);
         else
-        	cout<<" Too many few arguments for "<<DELETE_DIR;
+        	cout<<" Too many few arguments for "<<DELETE_DIR<<" expecting exactly 2";
 	}
 
 	else if(opcode==DELETE_FILE){
 		if(words.size()==2)
         	return deleteFile(words[1]);
         else
-        	cout<<" Too many few arguments for "<<DELETE_FILE;
+        	cout<<" Too many few arguments for "<<DELETE_FILE<<" expecting exactly 2";
 	}
 
 	else if(opcode==COPY){
 		if(words.size()>=3)
         	return copy(words);
         else
-        	cout<<"Very few arguments "<<COPY<<" expecing atleast 3";
+        	cout<<" Very few arguments "<<COPY<<" expecting atleast 3";
+	}
+	else{
+		cout<<" Please enter a valid command";
 	}
 	
 	return FAILURE;
@@ -85,11 +88,24 @@ enum CommandState gotoDirectory(string directory){
 			initialLS();
 			return SUCCESS_GOTO;
 		}*/
-		if(directory[0]=='.'){
-			cout<<"Path must start from / not .";
+		string path;
+		if(path[0]=='.'){
+			cout<<"Path must start from / or ~ not .";
 			return FAILURE;
 		}
-		string path=("."+directory+"/");
+		if(directory[0]=='~'){
+			path=("."+directory.substr(1,directory.size()-1)+"/");
+		}
+		else if(directory[0]=='/'){
+			if(directory.size()==1)
+				path="./";
+			else
+				path=("."+directory+"/");
+		}
+		//relative path starting from directory name
+		else{
+			path=stackBackHistory.back()+directory+"/";
+		}
 		/*struct stat info1;struct stat info2;
     	stat(stackBackHistory.back().c_str(),&info1);stat(path.c_str(),&info2);
     	if(info1.st_dev==info2.st_dev&&info1.st_ino==info2.st_ino){
@@ -109,11 +125,30 @@ enum CommandState gotoDirectory(string directory){
 enum CommandState createDirectory(string dirName,string path){
     int isNotCreated;
     DIR *pDir;
+	if((path[0]=='.'&&path[1]=='.') || (path[0]=='.'&&path[1]=='/') ){
+		cout<<"Path must start from / or ~ or directoryName not .";
+		return FAILURE;
+	}
+	if(path[0]=='.'){
+		path=stackBackHistory.back()+dirName;
+	}
+	else if(path[0]=='~'){
+		path=("."+path.substr(1,path.size()-1)+"/"+dirName);
+	}
+	else if(path[0]=='/'){
+		if(path.size()==1)
+			path="."+path+dirName;
+		else
+			path=("."+path+"/"+dirName);
+	}
+	else{
+		path=stackBackHistory.back()+path+"/"+dirName;
+	}
     //create directory in pwd
-    if(path==".")
+   /* if(path==".")
     	path=stackBackHistory.back()+dirName;
     else//directory in given path
-    	path="."+path.substr(1,path.size())+"/"+dirName;
+    	path="."+path.substr(1,path.size())+"/"+dirName;*/
     isNotCreated = mkdir(path.c_str(),S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     //created
     if (!isNotCreated){
@@ -128,22 +163,42 @@ enum CommandState createDirectory(string dirName,string path){
     }
     //not created
     else {
-        cout<<" Unable to create directory "<<strerror(errno);
+        cout<<" Unable to create directory: "<<strerror(errno);
         return FAILURE;
     }
  
 }
 enum CommandState createFile(string fileName,string path){
     DIR *pDir;
-    if(path==".")
+    if((path[0]=='.'&&path[1]=='.') || (path[0]=='.'&&path[1]=='/') ){
+			cout<<"Path must start from / or ~ or directoryName not";
+			return FAILURE;
+	}
+	if(path[0]=='.'){
+		path=stackBackHistory.back();
+	}
+	else if(path[0]=='~'){
+		path=("."+path.substr(1,path.size()-1)+"/");
+	}
+	else if(path[0]=='/'){
+		if(path.size()==1)
+			path="./";
+		else
+			path=("."+path+"/");
+	}
+	else{
+		path=stackBackHistory.back()+path+"/";
+	}
+   /* if(path==".")
     	path=stackBackHistory.back();
     else//file in given path
-    	path="."+path.substr(1,path.size())+"/";
+    	path="."+path.substr(1,path.size())+"/";*/
     struct stat info;
     //if directory already exist?
     if (stat(path.c_str(), &info) != -1) {
    		if (S_ISDIR(info.st_mode)) {
-			fopen ((path+fileName).c_str(),"w+");
+   			open((path+fileName).c_str(), O_WRONLY | O_CREAT , 0664);
+			//fopen ((path+fileName).c_str(),"w+");
 			//load current directory again
 			pDir = openDirectory(stackBackHistory.back().c_str());
 			if(pDir==NULL)
@@ -163,8 +218,27 @@ enum CommandState createFile(string fileName,string path){
 
 enum CommandState deleteDir(string path){
 	int isNotDeleted;
-    DIR *pDir;    
-    path=stackBackHistory.back()+path;
+    DIR *pDir;
+    if((path[0]=='.'&&path[1]=='.') || (path[0]=='.'&&path[1]=='/') ){
+			cout<<"Path must start from / or ~ or directoryName not";
+			return FAILURE;
+	}
+	if(path[0]=='.'){
+		path=stackBackHistory.back();
+	}
+	else if(path[0]=='~'){
+		path=("."+path.substr(1,path.size()-1)+"/");
+	}
+	else if(path[0]=='/'){
+		if(path.size()==1)
+			path="./";
+		else
+			path=("."+path+"/");
+	}
+	else{
+		path=stackBackHistory.back()+path+"/";
+	}    
+    /*path=stackBackHistory.back()+path;*/
     //check if its current working directory
     struct stat info1;struct stat info2;
     stat(path.c_str(),&info1);stat((stackBackHistory.back()).c_str(),&info2);
@@ -195,8 +269,24 @@ enum CommandState deleteDir(string path){
 
 enum CommandState deleteFile(string path){
 	int isNotDeleted;
-    DIR *pDir;    
-    path=stackBackHistory.back()+path;
+    DIR *pDir;
+    if((path[0]=='.'&&path[1]=='.') || (path[0]=='.'&&path[1]=='/') ){
+			cout<<"Path must start from / or ~ or directoryName not";
+			return FAILURE;
+	}
+	else if(path[0]=='~'){
+		path=("."+path.substr(1,path.size()-1));
+	}
+	else if(path[0]=='/'){
+		if(path.size()==1)
+			path="./";
+		else
+			path=("."+path);
+	}
+	else{
+		path=stackBackHistory.back()+path;
+	}        
+    /*path=stackBackHistory.back()+path;*/
     //deleted
     isNotDeleted = unlink(path.c_str());
    	if (!isNotDeleted){
@@ -209,7 +299,6 @@ enum CommandState deleteFile(string path){
 		closedir(pDir);
 		return SUCCESS_FILE_DELETED;
    	}
-   	
    	else
    	{   
    		cout<<" Error: "<<strerror(errno);
@@ -219,6 +308,7 @@ enum CommandState deleteFile(string path){
 }
 
 enum CommandState copy(vector<string> words){
+	DIR *pDir;
 	vector<string> filenames;
 	struct stat info;
     string currentDir,path,dPath;
@@ -242,12 +332,43 @@ enum CommandState copy(vector<string> words){
     
     }
     dPath=words[words.size()-1];
-    if(dPath==".")
+    if((dPath[0]=='.'&&dPath[1]=='.') || (dPath[0]=='.'&&dPath[1]=='/') ){
+			cout<<"Path must start from / or ~ or directoryName not";
+			return FAILURE;
+	}
+	else if(dPath[0]=='.'){
+		dPath=stackBackHistory.back();
+	}
+	else if(dPath[0]=='~'){
+		dPath=("."+dPath.substr(1,dPath.size()-1)+"/");
+	}
+	else if(dPath[0]=='/'){
+		if(dPath.size()==1)
+			dPath="./";
+		else
+			dPath=("."+dPath+"/");
+	}
+	else{
+		dPath=stackBackHistory.back()+dPath+"/";
+	}
+    /*if(dPath==".")
     	dPath=stackBackHistory.back();
     else//file in given path
-    	dPath="."+dPath.substr(1,dPath.size())+"/";
+    	dPath="."+dPath.substr(1,dPath.size())+"/";*/
 
-    return copyFilesRecursively(filenames,dPath);
+	enum CommandState isSuccess=copyFilesRecursively(filenames,dPath);
+	if(isSuccess==SUCCESS_COPY){
+		pDir = openDirectory(stackBackHistory.back().c_str());
+		//load current directory again
+		if(pDir==NULL)
+			return FAILURE;
+		getFileList(pDir);
+		printFilesWinDependent(0,windLine-tailOmit,"");
+		closedir(pDir);	
+	}
+	return isSuccess;
+	
+    
 }
 
 
@@ -258,7 +379,7 @@ enum CommandState copyFilesRecursively(vector<string> filenames, string destinat
 		string fileName=*i,filePath;
 		//if same file already exist
 		filePath=stackBackHistory.back()+fileName;
-    	if(stat((destination+fileName).c_str(),&info)==0){
+    	while(stat((destination+fileName).c_str(),&info)!=-1){
     		size_t found = fileName.rfind(".");
   			if (found!=std::string::npos)
   				fileName=fileName.substr(0,found)+"-copy"+fileName.substr(found,fileName.size()-found);
@@ -268,10 +389,10 @@ enum CommandState copyFilesRecursively(vector<string> filenames, string destinat
 		if(isDirectory(filePath)){
 			bool isNotCreated;
 			isNotCreated=mkdir((destination+fileName).c_str(),S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-			while(isNotCreated){
+			/*while(isNotCreated){
 				fileName=fileName+"-copy";
 				isNotCreated=mkdir((destination+fileName).c_str(),S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-			}
+			}*/
 			if(isNotCreated){
 				cout<<strerror(errno);
 				return FAILURE;
@@ -282,7 +403,7 @@ enum CommandState copyFilesRecursively(vector<string> filenames, string destinat
 			copyFile(filePath,destination+fileName);
 		}
 	}
-	return FAILURE;
+	return SUCCESS_COPY;
 }
 
 void copyDir(string sourcePath,string destination){
@@ -319,13 +440,13 @@ void copyFile(string filePath,string destination){
 	//size_t BUFFER_SIZE = 1024;
     char inputB[BUFSIZ];
     size_t size;
-    FILE* inF =fopen(filePath.c_str(),"r");
-    FILE* outF = fopen(destination.c_str(), "w+");
- 	while ((size = fread(inputB, 1, BUFSIZ, inF))){
-        fwrite(inputB, 1, size, outF);
+    int inF =open(filePath.c_str(),O_RDONLY, 0);
+    int outF = open(destination.c_str(), O_WRONLY | O_CREAT , 0664);
+ 	 while ((size = read(inF, inputB, BUFSIZ)) > 0) {
+        write(outF, inputB, size);
     }
-	fclose(inF);
-    fclose(outF);
+    close(inF);
+    close(outF);
 }
 
 bool isDirectory(string path)

@@ -22,6 +22,9 @@ void printFilesWinDependent(unsigned long firstIndex,unsigned long lastIndex,str
             string s=Flist[i];
             printStatInfo(getStatInfo(stackBackHistory.back(),s),s);    
         }
+        cursorMove(1000,1);
+        cursorUp(1);
+        cout<<(stackBackHistory.back()).substr(1,(stackBackHistory.back()).size()-1);
 }
 
 
@@ -65,7 +68,12 @@ unsigned long backspace(){
         filePath="./";
     }
     else{
-        stackBackHistory.push_back(stackBackHistory.back()+".."+"/");//format - ./dirname/
+        string tfileName=(stackBackHistory.back()).substr(0,(stackBackHistory.back()).size()-1);
+        size_t found = tfileName.rfind("/");
+        if (found!=std::string::npos)
+            tfileName=tfileName.substr(0,found);
+        stackBackHistory.push_back(tfileName+"/");
+        //stackBackHistory.push_back(stackBackHistory.back()+".."+"/");//format - ./dirname/
         filePath=stackBackHistory.back();//format - ./dirname/
     }
     DIR * pDir = openDirectory(filePath.c_str());
@@ -119,7 +127,7 @@ void openFile(string filePath){
     freopen("error.txt", "w", stderr);
     pid_t pid = fork();
     int status;
-    if (pid == -1){
+    if (pid == -1){freopen("error.txt", "w", stderr);
         printf("can't fork, error occured\n");
         exit(EXIT_FAILURE);
     }
@@ -179,7 +187,12 @@ long enterDirectory(unsigned long indexOfFile){
                 string parent=stackBackHistory.back();
                 stackBackHistory.push_back(currDir);
                 stackBackHistory.push_back(parent);*/
-                stackBackHistory.push_back(stackBackHistory.back()+fName+"/");//format - ./dirname/
+                string tfileName=(stackBackHistory.back()).substr(0,(stackBackHistory.back()).size()-1);
+                size_t found = tfileName.rfind("/");
+                if (found!=std::string::npos)
+                    tfileName=tfileName.substr(0,found);
+                stackBackHistory.push_back(tfileName+"/");
+                //stackBackHistory.push_back(stackBackHistory.back()+fName+"/");//format - ./dirname/
             }
             else{//push the complete absolute path of current directory
                 //clear the forward stack when moving to different directory from root
@@ -218,7 +231,7 @@ unsigned long initialLS(){
         stackBackHistory.clear();
         stackForwardHistory.clear();
         ioctl(0, TIOCGWINSZ, &w);
-        windLine=w.ws_row;
+        windLine=w.ws_row-1;
 		unsigned long totalfiles;	
         //struct dirent *pDirent;
         DIR *pDir;

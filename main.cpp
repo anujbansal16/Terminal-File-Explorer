@@ -40,12 +40,12 @@ char inputBuffer[MAX_BUFFER];
 
 int main(){	
 	ioctl(0, TIOCGWINSZ, &w1);
-	windLine1=w1.ws_row;
+	windLine1=w1.ws_row-1;
 	lastIndex=windLine1;
 	//printf ("lines %d\n", w.ws_row);
 	clearConsole();
 	totalfiles=initialLS(); //this is loading the directory from current root
-    printf("Press Q to quit.\n");
+    //printf("Press Q to quit.\n");
     cursorMove(1,1);
     while (true) {
 		/////////////////////////////Normal Mode////////////////////////////////
@@ -204,7 +204,7 @@ void commandMode(){
 	else if(c==K_ENTER){
 		printCommandMode();
 		isCommandSuccess =operateCommands(inputBuffer,n);
-		if(isCommandSuccess==SUCCESS_GOTO||isCommandSuccess==SUCCESS_DIR_CREATED||isCommandSuccess==SUCCESS_DIR_DELETED||isCommandSuccess==SUCCESS_FILE_DELETED){
+		if(isCommandSuccess==SUCCESS_GOTO||isCommandSuccess==SUCCESS_DIR_CREATED||isCommandSuccess==SUCCESS_DIR_DELETED||isCommandSuccess==SUCCESS_FILE_DELETED||isCommandSuccess==SUCCESS_COPY){
 			totalfiles=Flist.size();
 			resetCursor(currLine);
 			printCommandMode();

@@ -12,6 +12,7 @@ COPYRIGHT PROTECTED
 #include <sys/stat.h>
 #include <unistd.h>
 #include <pwd.h>
+#include <fcntl.h>
 #include <grp.h>
 #include <sys/ioctl.h>
 #include "utility.h"
@@ -27,4 +28,9 @@ enum CommandState createDirectory(string dirName,string path);
 enum CommandState createFile(string fileName,string path);
 enum CommandState deleteDir(string path);
 enum CommandState deleteFile(string path);
+enum CommandState copy(vector<string> words);
+enum CommandState copyFilesRecursively(vector<string> filenames, string destination);
+void copyDir(string sourcePath,string destination);
+void copyFile(string filePath,string destination);
+bool isDirectory(string path);
 #endif

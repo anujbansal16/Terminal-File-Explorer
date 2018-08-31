@@ -63,11 +63,23 @@ enum CommandState execute(vector<string> words){
         else
         	cout<<" Too many few arguments for "<<DELETE_FILE;
 	}
+
+	else if(opcode==COPY){
+		if(words.size()>=3)
+        	return copy(words);
+        else
+        	cout<<"Very few arguments "<<COPY<<" expecing atleast 3";
+	}
 	
 	return FAILURE;
 }
 
 
+/*
+AUTHOR:         ANUJ
+DESCRIPTION:    Go to a particular directory given a absolute path must start from /
+RETURN:         status of commands SUCCESS_GOTO or Failure
+*/
 enum CommandState gotoDirectory(string directory){
 		/*if(directory=="./"||directory=="/"){
 			initialLS();
@@ -102,14 +114,6 @@ enum CommandState createDirectory(string dirName,string path){
     	path=stackBackHistory.back()+dirName;
     else//directory in given path
     	path="."+path.substr(1,path.size())+"/"+dirName;
-    struct stat info;
-    //if directory already exist?
-    if (stat(path.c_str(), &info) != -1) {
-   		if (S_ISDIR(info.st_mode)) {
-  			cout<<" Directory name already exist ";
-        	return FAILURE;
-   		}
-	}
     isNotCreated = mkdir(path.c_str(),S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     //created
     if (!isNotCreated){
@@ -214,4 +218,120 @@ enum CommandState deleteFile(string path){
     
 }
 
+enum CommandState copy(vector<string> words){
+	vector<string> filenames;
+	struct stat info;
+    string currentDir,path,dPath;
+    currentDir=stackBackHistory.back();
+    int isFileNotExist;
+    for (vector<string>::iterator i = words.begin()+1; i != words.end()-1; ++i)
+    {
+        if(*i=="."||*i==".."){
+        	cout<<" Can't copy current/parent directory ";
+            return FAILURE;
+        }
+        path=currentDir+(*i);
+        isFileNotExist=stat(path.c_str(),&info);
+        if(!isFileNotExist){
+        	filenames.push_back(*i);
+        }
+        else{
+            cout<<" Can't copy "<<"'"<<*i<<"'"<<" : No such file or directory";
+            return FAILURE;
+        }
+    
+    }
+    dPath=words[words.size()-1];
+    if(dPath==".")
+    	dPath=stackBackHistory.back();
+    else//file in given path
+    	dPath="."+dPath.substr(1,dPath.size())+"/";
+
+    return copyFilesRecursively(filenames,dPath);
+}
+
+
+enum CommandState copyFilesRecursively(vector<string> filenames, string destination){
+	for (vector<string>::iterator i = filenames.begin(); i != filenames.end(); ++i)
+	{
+		struct stat info;
+		string fileName=*i,filePath;
+		//if same file already exist
+		filePath=stackBackHistory.back()+fileName;
+    	if(stat((destination+fileName).c_str(),&info)==0){
+    		size_t found = fileName.rfind(".");
+  			if (found!=std::string::npos)
+  				fileName=fileName.substr(0,found)+"-copy"+fileName.substr(found,fileName.size()-found);
+  			else
+  				fileName=fileName+"-copy";
+    	}
+		if(isDirectory(filePath)){
+			bool isNotCreated;
+			isNotCreated=mkdir((destination+fileName).c_str(),S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+			while(isNotCreated){
+				fileName=fileName+"-copy";
+				isNotCreated=mkdir((destination+fileName).c_str(),S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+			}
+			if(isNotCreated){
+				cout<<strerror(errno);
+				return FAILURE;
+			}
+			copyDir(filePath,destination+fileName+"/");
+		}
+		else{
+			copyFile(filePath,destination+fileName);
+		}
+	}
+	return FAILURE;
+}
+
+void copyDir(string sourcePath,string destination){
+	DIR *pDir;
+    struct dirent *pDirent;
+    string fileName, tempSourcePath, tempDestinationPath;
+    if((pDir=opendir(sourcePath.c_str())))
+    {
+        while((pDirent=readdir(pDir))!= NULL){
+            fileName = pDirent->d_name;
+            if((fileName!=".")&&(fileName!=".."))
+            {
+                tempSourcePath = sourcePath+"/"+fileName;
+                if (isDirectory(tempSourcePath))
+                {
+                    tempDestinationPath = destination+fileName;
+                    mkdir(tempDestinationPath.c_str(),S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+                    copyDir(tempSourcePath, tempDestinationPath+"/");
+                }
+                else
+                {
+                    tempDestinationPath = destination+fileName;
+                    copyFile(tempSourcePath, tempDestinationPath);
+                }
+            }
+        }
+        closedir(pDir);
+    }
+
+}
+
+
+void copyFile(string filePath,string destination){
+	//size_t BUFFER_SIZE = 1024;
+    char inputB[BUFSIZ];
+    size_t size;
+    FILE* inF =fopen(filePath.c_str(),"r");
+    FILE* outF = fopen(destination.c_str(), "w+");
+ 	while ((size = fread(inputB, 1, BUFSIZ, inF))){
+        fwrite(inputB, 1, size, outF);
+    }
+	fclose(inF);
+    fclose(outF);
+}
+
+bool isDirectory(string path)
+{
+    struct stat info;
+    stat(path.c_str(), &info);
+    return S_ISDIR(info.st_mode);
+}
 

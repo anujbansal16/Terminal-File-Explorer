@@ -27,7 +27,6 @@ COPYRIGHT PROTECTED
 #define MOVE "move"
 #define RENAME "rename"
 #define GOTO "goto"
-#define GOTO "goto"
 #define CREATE_DIR "create_dir"
 #define CREATE_FILE "create_file"
 #define DELETE_DIR "delete_dir"
@@ -52,7 +51,7 @@ void printHumanReadableSize(long size);
 void printInputBuffer(char inputBuffer[],long n);
 void printCommandMode();
 vector<string> tokenize(char inputBuffer[], string token);
-enum CommandState {FAILURE,SUCCESS_GOTO,SUCCESS_DIR_CREATED,SUCCESS_FILE_CREATED,SUCCESS_DIR_DELETED,SUCCESS_FILE_DELETED};
+enum CommandState {FAILURE,SUCCESS_GOTO,SUCCESS_DIR_CREATED,SUCCESS_FILE_CREATED,SUCCESS_DIR_DELETED,SUCCESS_FILE_DELETED,SUCCESS_COPY};
 #endif 
 
 

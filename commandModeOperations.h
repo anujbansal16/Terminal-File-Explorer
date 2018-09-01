@@ -36,6 +36,10 @@ bool isDirectory(string path);
 enum CommandState deleteFilesRecursively(vector<string> filenames,bool insideCode);
 void deleteDirRecursively(string filePath, bool insideCode);
 enum CommandState renameF(string source,string destination);
-void snapRec(string path, string destination);
+void snapRec(string path, string destination, string searchFile);
 enum CommandState snapShotF(string path, string destination);
+enum CommandState search(string searchFile);
+void checkAndAddResult(string path,string fileName,string searchFile);
+enum CommandState search(string searchFile);
+enum CommandState printSearchResults(vector<string> searchResults, string searchFileName);
 #endif

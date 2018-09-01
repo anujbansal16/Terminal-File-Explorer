@@ -9,6 +9,8 @@ extern vector<string> Flist;
 extern vector<string> stackBackHistory; // ./|dir1/|dir2|
 extern unsigned long windLine;
 extern unsigned long tailOmit;
+extern map <string,bool> fileToISDirecMap;
+vector<string> searchResults;
 enum CommandState operateCommands(char inputBuffer[],long n){
 	//buffer empty
 	if(n==0){
@@ -87,6 +89,12 @@ enum CommandState execute(vector<string> words){
         	return snapShotF(words[1],words[2]);
         else
         	cout<<" To many/few few arguments "<<RENAME<<" expecting exactly 3";
+	}
+	else if(opcode==SEARCH){
+		if(words.size()==2)
+        	return search(words[1]);
+        else
+        	cout<<" To many/few few arguments "<<SEARCH<<" expecting exactly 2";
 	}
 	else{
 		cout<<" Please enter a valid command";
@@ -576,7 +584,7 @@ enum CommandState snapShotF(string path, string destination){
 			cout<<"Enter a proper dumpfile Name";
 			return FAILURE;
 		}
-		snapRec(path,stackBackHistory.back()+destination);	
+		snapRec(path,stackBackHistory.back()+destination,"");	
 		DIR *pDir = openDirectory(stackBackHistory.back().c_str());
 		//load current directory again
 		if(pDir==NULL)
@@ -593,39 +601,117 @@ enum CommandState snapShotF(string path, string destination){
 	
 }
 
-void snapRec(string path, string destination){
+void snapRec(string path, string destination, string searchFile){
 	DIR *pDir;
     struct dirent *pDirent;
     string fileName, tempSourcePath;
     stack <string> q;
     //int outF = open(destination.c_str(), O_APPEND | O_CREAT , 0664);
-	ofstream outFile(destination); 
+    ofstream outFile;
+	if(searchFile.size()==0)
+		outFile.open(destination,ofstream::out); 
 	
 	q.push(path);
 	while(!q.empty()){
 		string front=q.top();
 		q.pop();
-		outFile<<front.substr(1,front.size()-1)<<":\n";	
+		string pathWithoutDot=front.substr(1,front.size()-1);
+		if(searchFile.size()==0)
+			outFile<<pathWithoutDot<<":\n";	
 	    if((pDir=opendir(front.c_str())))
-	    {
+	    {	
 	        while((pDirent=readdir(pDir))!= NULL){
 	            fileName = pDirent->d_name;
 	            if((fileName!=".")&&(fileName!=".."))
 	            {
+	            	if(searchFile.size()>0){
+	            		checkAndAddResult(pathWithoutDot,fileName,searchFile);
+	            	}
 	                tempSourcePath = front+fileName;
 	                if (isDirectory(tempSourcePath))
 	                {
 	                    q.push(tempSourcePath+"/");
 	                }
-	                outFile<<fileName<<" ";
+	                if(searchFile.size()==0)
+	                	outFile<<fileName<<" ";
 	            }
 
 	        }
-	        outFile<<"\n\n";
+	        if(searchFile.size()==0)
+	        	outFile<<"\n\n";
 	    }
 	}
 	closedir(pDir);
 }
+
+
+enum CommandState search(string searchFile){
+	searchResults.clear();
+	string currentDir=stackBackHistory.back();
+	if(searchFile[0]=='.' || searchFile[0]=='/' || searchFile[0]=='~' ){
+		cout<<"Enter a proper searchFile  Name";
+		return FAILURE;
+	}
+	snapRec(currentDir,"",searchFile);
+	if(searchResults.empty()){
+			cout<<"No results found for "<<searchFile;
+			return FAILURE;
+	}
+	stackBackHistory.push_back(currentDir);
+	return printSearchResults(searchResults,searchFile);
+}
+
+void checkAndAddResult(string path,string fileName,string searchFile){
+	string file;
+	if(fileName==searchFile){
+		cout<<path+file;
+		file="."+path;
+		searchResults.push_back(file);		
+	}
+}
+
+enum CommandState printSearchResults(vector<string> searchResults, string searchFileName){       
+        struct stat info;   
+        string searchedFile,dirPath,currentDir;
+        clearConsole();
+        Flist.clear();
+    	fileToISDirecMap.clear();
+    	currentDir=stackBackHistory.back();
+    	long cDirLen=currentDir.size();
+        for(unsigned long i=0;i<searchResults.size();i++){
+            searchedFile=searchResults[i];
+            dirPath=searchedFile.substr(cDirLen,searchedFile.size()-cDirLen);
+            // cout<<dirPath<<"\n";
+            Flist.push_back(searchedFile.substr(cDirLen,searchedFile.size()-cDirLen-1));
+            fileToISDirecMap[searchedFile.substr(cDirLen,searchedFile.size()-cDirLen-1)]=true;
+    		if(stat((searchedFile).c_str(), &info)==-1){
+        		perror(strerror(errno));
+    		}
+    		//extracting containing directory path
+           //printStatInfo(info,searchedFile.substr(1,searchedFile.size()-1));   
+			mode_t mode=info.st_mode;
+			string per=((S_ISDIR(mode)) ? "d" : "-");
+			per+=((mode & S_IRUSR) ? "r" : "-");
+			per+=((mode & S_IWUSR) ? "w" : "-");
+			per+=((mode & S_IXUSR) ? "x" : "-");
+			per+=((mode & S_IRGRP) ? "r" : "-");
+			per+=((mode & S_IWGRP) ? "w" : "-");
+			per+=((mode & S_IXGRP) ? "x" : "-");
+			per+=((mode & S_IROTH) ? "r" : "-");
+			per+=((mode & S_IWOTH) ? "w" : "-");
+			per+=((mode & S_IXOTH) ? "x" : "-");
+			//string time=((string)ctime(&info.st_mtime)).substr(0,24);
+			printf("%4s",per.c_str());
+			//printf(" %4s",pswd->pw_name);
+			//printf(" %4s",grp->gr_name);
+			//printf(" %4s",time.c_str());
+			//printHumanReadableSize(info.st_size);
+			printf(" %s",(searchedFile.substr(1,searchedFile.size()-1)).c_str()); 
+			printf("\n");
+        }
+        return SUCCESS_SEARCH;
+}
+
 
 
 bool isDirectory(string path)

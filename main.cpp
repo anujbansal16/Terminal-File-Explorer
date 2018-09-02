@@ -197,7 +197,7 @@ DESCRIPTION:    Command mode operations function, handles all key pressed events
 				respective function calls from various modules.ie
 				ESC=> Switch back to normal mode
 				ENTER=>Execute the enetered command
-				BACKSPACE=>Back to parent directory
+				BACKSPACE=>Clear last character from buffer
 				READ input to input buffer
 */
 void commandMode(){

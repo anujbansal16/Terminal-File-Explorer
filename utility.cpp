@@ -5,17 +5,22 @@ ROLLNO. 2018201096
 COPYRIGHT PROTECTED
 ***********************************************************/
 #include"utility.h"
-int vmin=1;
+int vmin=1;//for handling the esc key issue
 int vtime=0;
+
+/*
+AUTHOR:         ANUJ
+DESCRIPTION:    Read a character in non-canonical mode and switch back again into canonical mode
+RETURN:         Return the character read
+*/
 int getch() {
       int c=0;
-      
       struct termios org_opts, new_opts;
       int res=0;
-          //-----  store old settings -----------
+      //-----  store old settings -----------
       res=tcgetattr(STDIN_FILENO, &org_opts);
       assert(res==0);
-          //---- set new terminal parms --------
+      //---- set new terminal parms --------
       memcpy(&new_opts, &org_opts, sizeof(new_opts));
       new_opts.c_lflag &=~(IXON | IEXTEN);
       new_opts.c_cc[VTIME]= vtime;    
@@ -23,7 +28,7 @@ int getch() {
       new_opts.c_lflag &= ~(ICANON | ECHO | ECHOE | ECHOK | ECHONL | ECHOPRT | ECHOKE | ICRNL | ISIG);
       tcsetattr(STDIN_FILENO, TCSANOW, &new_opts);
       c=getchar();
-          //------  restore old settings ---------
+      //------  restore old settings ---------
       res=tcsetattr(STDIN_FILENO, TCSANOW, &org_opts);
       assert(res==0);
       return(c);
@@ -61,6 +66,11 @@ void clearLine(){
   //clear current line
   printf("%c[2K", 27);
 }
+
+/*
+AUTHOR:         ANUJ
+DESCRIPTION:    Print the size of file in human readable format(similar to ls-lh)
+*/
 void printHumanReadableSize(long size)
 {
   long Kb = 1  * 1024;
@@ -98,23 +108,41 @@ void printHumanReadableSize(long size)
     cout<<setw(7)<<right<<val<<setw(1)<<right<<"P";
   }
 }
+
+
+/*
+AUTHOR:         ANUJ
+DESCRIPTION:    Print the character entered by user in non canonical mode (To handle backspace press)
+*/
 void printInputBuffer(char inputBuffer[], long n){
   for (long i=0;i<n;i++)
       printf("%c", inputBuffer[i]);
 }
+
+/*
+AUTHOR:         ANUJ
+DESCRIPTION:    Print command mode there by moving the cursor to the last line of the cursor
+*/
 void printCommandMode(){
   cursorMove(1000,1);
   clearLine();    
   printf("COMMAND MODE :");
 }
+
+/*
+AUTHOR:         ANUJ
+DESCRIPTION:    Tokenize the characters entered by users in command mode dilimited by space
+PARAMETERS:     Input buffer, token=>delimter
+RETURN:         vector of words
+*/
 vector<string> tokenize(char inputBuffer[], string token){
   vector<string> words;
-    char* word = strtok(inputBuffer, token.c_str());
-    while (word != NULL) {
-        words.push_back(word);
-        word = strtok(NULL, token.c_str());
-    }
-    return words;
+  char* word = strtok(inputBuffer, token.c_str());
+  while (word != NULL) {
+    words.push_back(word);
+    word = strtok(NULL, token.c_str());
+  }
+  return words;
 }
   
 

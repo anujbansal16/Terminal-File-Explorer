@@ -9,6 +9,7 @@ COPYRIGHT PROTECTED
 #include <signal.h>
 #include <termios.h>
 #include <signal.h>
+///////////////Key Mappings///////////
 #define K_ESC '\033'
 #define K_UP 'A'
 #define K_DOWN 'B'
@@ -22,7 +23,9 @@ COPYRIGHT PROTECTED
 #define K_BACKSPACE 127
 #define K_ENTER 10
 #define K_SPACE 10
+
 #define MAX_BUFFER 2000
+///////////various commands opcodes/////////////
 #define COPY "copy"
 #define MOVE "move"
 #define RENAME "rename"
@@ -33,8 +36,6 @@ COPYRIGHT PROTECTED
 #define DELETE_DIR "delete_dir"
 #define DELETE_FILE "delete_file"
 #define SEARCH "search"
-
-
 using namespace std;
 
 #ifndef INC_UTILITY_H
@@ -53,7 +54,9 @@ void printHumanReadableSize(long size);
 void printInputBuffer(char inputBuffer[],long n);
 void printCommandMode();
 vector<string> tokenize(char inputBuffer[], string token);
+//Enum to identify the success and failures of various commands
 enum CommandState {FAILURE,SUCCESS_GOTO,SUCCESS_DIR_CREATED,SUCCESS_FILE_CREATED,SUCCESS_DIR_DELETED,SUCCESS_FILE_DELETED,SUCCESS_COPY,SUCCESS_MOVE,SUCCESS_RENAME,SUCCESS_SNAPSHOT,SUCCESS_SEARCH};
+
 #endif 
 
 

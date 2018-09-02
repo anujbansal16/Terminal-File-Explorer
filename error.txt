@@ -1,1 +1,1 @@
-Opening "./.gitignore" with gedit  (text/plain)
+Opening "./snap.txt" with gedit  (text/plain)

@@ -18,21 +18,21 @@ COPYRIGHT PROTECTED
 #include"utility.h"
 using namespace std;
 
-
 #ifndef INC_MODULE2_H
 #define INC_MODULE2_H
-unsigned long initialLS();
-struct stat getStatInfo(string rootPath, string fName);
-void printHead();
-DIR * openDirectory(const char* s);
-void getFileList(DIR * pDir);
-long enterDirectory(unsigned long indexOfFile);
-void printStatInfo(struct stat info, string fName);
-void openFile(string filePath);
-unsigned long backDirect();
-unsigned long forwardDirect();
-void printFilesWinDependent(unsigned long firstIndex,unsigned long lastIndex,string path);
-unsigned long backspace();
-unsigned long goHome();
+
+unsigned long initialLS();//initial loading the root directory files
+struct stat getStatInfo(string rootPath, string fName);//stat info of a file given path and filename
+void printHead();//print column names
+DIR * openDirectory(const char* s);//open directory given the path
+void getFileList(DIR * pDir);//prepare filename array of files present in directory
+long enterDirectory(unsigned long indexOfFile);//enter a directory on ENTER press
+void printStatInfo(struct stat info, string fName);//iteratively display information of files
+void openFile(string filePath);//open a file in the default application
+unsigned long backDirect();//go back to previously visited directory
+unsigned long forwardDirect();//go to next visited directory
+void printFilesWinDependent(unsigned long firstIndex,unsigned long lastIndex,string path);//print number of files depending upon the window size
+unsigned long backspace();//go back to parent directory
+unsigned long goHome();//go to Home(Root) Directory
 
 #endif

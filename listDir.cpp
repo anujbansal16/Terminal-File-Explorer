@@ -11,34 +11,36 @@ struct winsize w;
 unsigned long tailOmit=1;
 unsigned long windLine;
 unsigned long col;
-vector<string> stackBackHistory; // ./|dir1/|dir2|
-vector<string> stackForwardHistory;// dir1|dir2|
+vector<string> stackBackHistory; //visited directory history format=> ./|dir1|/|dir2|
+vector<string> stackForwardHistory;//next visited directory history format=> ./|dir1|/|dir2|/
 map <string,bool> fileToISDirecMap; //filename mapping to boolean to determine if file is directory
 
+/*
+AUTHOR:         ANUJ
+DESCRIPTION:    Print number of files depending upon the window size
+PARAMETERS:     Input start index, Last index(determined by window size), path (optional)
+*/
 void printFilesWinDependent(unsigned long firstIndex,unsigned long lastIndex,string path){
-        //0-41
         clearConsole();
-        //to print files current directory path need to be on the top of the stacbackHistory
+        //to print files current directory path need to be on the top of the stackBackHistory
         for(unsigned long i=firstIndex;i<lastIndex&&i<Flist.size();i++){
             string s=Flist[i];
             printStatInfo(getStatInfo(stackBackHistory.back(),s),s);    
         }
-        cursorMove(1000,1);
-        cursorUp(1);
+        cursorMove(1000,1);//move cursor to last line of terminal
+        cursorUp(1);//move cursor to 1 line up to print path
         string displayPath=(stackBackHistory.back()).substr(1,(stackBackHistory.back()).size()-1);
+        //display path (append ... if path is greater than the window size)
         if(displayPath.size()+1>col)
             printf("%s...",(displayPath.substr(0,col-3)).c_str());
         else
         printf("%s",displayPath.c_str());
-        //cout<<(stackBackHistory.back()).substr(1,(stackBackHistory.back()).size()-1);
 }
-
-
 
 /*
 AUTHOR:         ANUJ
-DESCRIPTION:    Update the name of file and fetches visited directory files on right arrow key press using FORWARD Stack
-RETURN:         number of files present in the previous directory
+DESCRIPTION:    Goto next visited directory (Using forward history stack) on RIGHT arrow key event
+RETURN:         number of files present in the next visited directory
 */
 unsigned long forwardDirect(){
     unsigned long totalfiles=Flist.size();
@@ -52,21 +54,18 @@ unsigned long forwardDirect(){
         getFileList(pDir);
         totalfiles=Flist.size();
         printFilesWinDependent(0,windLine-tailOmit,path);
-        //cout<<path<<endl;
         closedir (pDir);
         return totalfiles;
-        }
-        //nothing in stack
-        return 0;
-
+    }
+    //nothing in stack
+    return 0;
 }
 
 /*
 AUTHOR:         ANUJ
-DESCRIPTION:    Update the name of file and fetches previous directory files on left arrow key press using BACKWARD Stack
-RETURN:         number of files present in the previous directory
+DESCRIPTION:    Goto parent directory (Using backward history stack) on BACKSPACE arrow key event
+RETURN:         number of files present in the next visited directory
 */
-
 unsigned long backspace(){
     string fName="..";string filePath;
     struct stat info1;struct stat info2;
@@ -80,8 +79,7 @@ unsigned long backspace(){
         if (found!=std::string::npos)
             tfileName=tfileName.substr(0,found);
         stackBackHistory.push_back(tfileName+"/");
-        //stackBackHistory.push_back(stackBackHistory.back()+".."+"/");//format - ./dirname/
-        filePath=stackBackHistory.back();//format - ./dirname/
+        filePath=stackBackHistory.back();//format - ./|dirname|/
     }
     DIR * pDir = openDirectory(filePath.c_str());
     getFileList(pDir);
@@ -91,41 +89,46 @@ unsigned long backspace(){
     return totalfiles;
 }
 
+/*
+AUTHOR:         ANUJ
+DESCRIPTION:    Go to Home(Root) Directory
+RETURN:         number of files present in the root directory
+*/
 unsigned long goHome(){
         return initialLS();
 }
 
+/*
+AUTHOR:         ANUJ
+DESCRIPTION:    Goto previously visited directory (Using backward history stack) on LEFT arrow key event
+RETURN:         number of files present in the next visited directory
+*/
 unsigned long backDirect(){
     unsigned long totalfiles=Flist.size();
     //check if we are at root ie './''
-    //if((stackBackHistory.back().compare("./")!=0)){
     if((stackBackHistory.size()!=1)){
         string path;
         //push the directory from where we are going back for forward traversing
         stackForwardHistory.push_back(stackBackHistory.back());
         //take the current directory out to go back on previous directory
         stackBackHistory.pop_back();
+        //previous directory
         path=stackBackHistory.back();    
-        //for (vector<string>::iterator i= stackBackHistory.begin(); i != stackBackHistory.end(); ++i){
-        //    path+=*i;
-        //}
-
         DIR * pDir = openDirectory(path.c_str());
         getFileList(pDir);
         totalfiles=Flist.size();
         printFilesWinDependent(0,windLine-tailOmit,path);
-        //cout<<path<<endl;
         closedir (pDir);
         return totalfiles;
     }
     //Nothing in stack
     return 0;
-    
 }
+
 
 /*
 AUTHOR:         ANUJ
-DESCRIPTION:    Open up the file using xdg-open
+DESCRIPTION:    Open up the file using mimeOpen
 PARAMETERS:     path of file
 */
 
@@ -149,8 +152,6 @@ void openFile(string filePath){
     else{
          if (waitpid(pid, &status, 0) > 0) {
             if (WIFEXITED(status) && !WEXITSTATUS(status)) ;
-              //printf("program execution successfull\n");
-             
         } 
         else {
            printf("waitpid() failed\n");
@@ -169,60 +170,46 @@ RETURN:         number of files(if directory) | -1 (if regular file)
 
 long enterDirectory(unsigned long indexOfFile){
     unsigned long totalfiles;
-    string fName=Flist[indexOfFile-1];  //name of the file or directory
-    //chck if we are in root directory and enterning ..
+    string fName=Flist[indexOfFile-1];//name of the file or directory
+    //check if we are in root directory and enterning ..
     struct stat info1;struct stat info2;
     stat("./..",&info1);stat((stackBackHistory.back()+fName).c_str(),&info2);
     if(info1.st_dev==info2.st_dev&&info1.st_ino==info2.st_ino){
-    //if((stackBackHistory.back().compare("./")==0)){
         //controlling enter press on .. in root directory
         if(fName.compare("..")==0){
             fName=".";
         }
-        //clearing forward history once we are at root and clicking on sibling directory
-        //if(fileToISDirecMap.find(fName)!=fileToISDirecMap.end())
-          //  if(fileToISDirecMap[fName]&&(fName.compare(".")!=0)&&(fName.compare("..")!=0))
-            //    stackForwardHistory.clear();
     }
-    string filePath=stackBackHistory.back()+fName;//format - ./dirname/
+    string filePath=stackBackHistory.back()+fName;//format=> ./|dirname|/
     //Check if file is directory and push its name in stack
     if(fileToISDirecMap.find(fName)!=fileToISDirecMap.end()){
         if(fileToISDirecMap[fName]){
             if(fName.compare(".")==0);//no push pop in case filename is .
-            else if(fName.compare("..")==0){//pop out the last directory name from stack
-                //stackForwardHistory.push_back(stackBackHistory.back());
-                /*string currDir=stackBackHistory.back();
-                stackBackHistory.pop_back();
-                string parent=stackBackHistory.back();
-                stackBackHistory.push_back(currDir);
-                stackBackHistory.push_back(parent);*/
+            else if(fName.compare("..")==0){
+                //pop out the last directory name from stack
                 string tfileName=(stackBackHistory.back()).substr(0,(stackBackHistory.back()).size()-1);
                 size_t found = tfileName.rfind("/");
                 if (found!=std::string::npos)
                     tfileName=tfileName.substr(0,found);
                 stackBackHistory.push_back(tfileName+"/");
-                //stackBackHistory.push_back(stackBackHistory.back()+fName+"/");//format - ./dirname/
             }
-            else{//push the complete absolute path of current directory
+            else{
                 //clear the forward stack when moving to different directory from root
                 if((stackBackHistory.size()==1)){
                        stackForwardHistory.clear();
                 }
-                stackBackHistory.push_back(stackBackHistory.back()+fName+"/");//format - ./dirname/
+                //push the complete absolute path of current directory
+                stackBackHistory.push_back(stackBackHistory.back()+fName+"/");//format - ./|dirname|/
             }
-
-            filePath=stackBackHistory.back();//format - ./dirname/
+            filePath=stackBackHistory.back();//format - ./|dirname|/
             DIR * pDir = openDirectory(filePath.c_str());
             getFileList(pDir);
             totalfiles=Flist.size();
-            //cout<<totalfiles;    
-            //cout<<filePath<<endl;
             printFilesWinDependent(0,windLine-tailOmit,filePath);
-            //cout<<filePath<<endl;
             closedir (pDir);
         }
     }
-    //open the file if the regular file is entered
+    //open the file if the regular file is ENTERED
     else{        
         openFile(filePath);
         totalfiles=-1;
@@ -230,57 +217,49 @@ long enterDirectory(unsigned long indexOfFile){
     return totalfiles;
 }
 
-
 /*
 AUTHOR:         ANUJ
-DESCRIPTION:    This function will print the iniitial ls -l kind of list of current directory files
+DESCRIPTION:    This function will print the initial ls -l type of listing of application
+                root directory files.
 */
-
 unsigned long initialLS(){
-        stackBackHistory.clear();
-        stackForwardHistory.clear();
-        ioctl(0, TIOCGWINSZ, &w);
-        windLine=w.ws_row-1;
-        col=w.ws_col;
-		unsigned long totalfiles;	
-        //struct dirent *pDirent;
-        DIR *pDir;
-        const char* rootPath="./";
-        //stach ./
-        stackBackHistory.push_back(rootPath);
-        pDir = openDirectory(rootPath);
-        getFileList(pDir);
-        totalfiles=Flist.size();        
-        printFilesWinDependent(0,windLine-tailOmit,rootPath);
-        closedir (pDir);
-        return totalfiles;
+    stackBackHistory.clear();
+    stackForwardHistory.clear();
+    ioctl(0, TIOCGWINSZ, &w);
+    windLine=w.ws_row-1;
+    col=w.ws_col;
+	unsigned long totalfiles;	
+    DIR *pDir;
+    const char* rootPath="./";
+    stackBackHistory.push_back(rootPath);//stack push ./
+    pDir = openDirectory(rootPath);
+    getFileList(pDir);
+    totalfiles=Flist.size();        
+    printFilesWinDependent(0,windLine-tailOmit,rootPath);
+    closedir (pDir);
+    return totalfiles;
 
 }
-
 
 /*
 AUTHOR:         ANUJ
 DESCRIPTION:    Open and return the directory
 PARAMETERS:     path of directory
 */
-
 DIR * openDirectory(const char* s){
     DIR *pDir;
     pDir = opendir(s);
     if (pDir == NULL) {
             cout<<" "<<(strerror(errno));
-            //exit(1);
     }
     return pDir;
 }
 
-
 /*
 AUTHOR:         ANUJ
-DESCRIPTION:    This function initialize the vector of file names
+DESCRIPTION:    This function read and initialize the vector of fileNames (Used in indexing to open a file)
 PARAMETERS:     DIR * - directory we want to read
 */
-
 void getFileList(DIR * pDir){
     Flist.clear();
     fileToISDirecMap.clear();
@@ -291,15 +270,13 @@ void getFileList(DIR * pDir){
     }
     if(!Flist.empty())
         sort(Flist.begin(),Flist.end());
-
 }
 
 /*
 AUTHOR:         ANUJ
-DESCRIPTION:    This function will return the stat of a file.
+DESCRIPTION:    This function will return the status of a file.
 PARAMETERS:     Path of directory of file (ended with /) , filename
 */
-
 struct stat getStatInfo(string rootPath, string fName){
     struct stat info;   
     if(stat((rootPath+fName).c_str(), &info)==-1){
@@ -310,13 +287,11 @@ struct stat getStatInfo(string rootPath, string fName){
     return info;
 }
 
-
 /*
 AUTHOR:         ANUJ
 DESCRIPTION:    This function will print the row of File information
 PARAMETERS:     stat, filename
 */
-
 
 void printStatInfo(struct stat info, string fName){
     struct passwd *pswd=getpwuid(info.st_uid);
@@ -332,17 +307,13 @@ void printStatInfo(struct stat info, string fName){
     per+=((mode & S_IROTH) ? "r" : "-");
     per+=((mode & S_IWOTH) ? "w" : "-");
     per+=((mode & S_IXOTH) ? "x" : "-");
-    //SIZE TO BE HUMAN READABLE
-    //string time=(string(asctime(gmtime(&(info.st_mtime))))).substr(0,24);
     string time=((string)ctime(&info.st_mtime)).substr(0,24);
     printf("%s",per.c_str());
     cout<<setw(8)<<right<<pswd->pw_name;
-    //printf(" %s",pswd->pw_name);
     cout<<setw(8)<<right<<grp->gr_name;
-    // printf(" %s",grp->gr_name);
     printf(" %s",time.c_str());
     printHumanReadableSize(info.st_size);
-    //dynamic adjustment of text based on window columns
+    //dynamic adjustment of text based on window columns ... apending
     if(fName.size()+62>col)
         printf(" %s...",(fName.substr(0,col-64)).c_str());
     else
@@ -350,11 +321,8 @@ void printStatInfo(struct stat info, string fName){
     cout<<endl; 
 }
 
-
 /*
-
 DESCRIPTION:    This function will print the header information of file listed
-
 */
 void printHead(){
 	//cout<<"PERMISSIONS"<<"\t"<<"OWNER"<<"\t"<<"GROUP"<<"\t"<<"SIZE"<<"\t"<<"LAST-MODIFIED"<<"\t\t\t"<<"NAME\n";

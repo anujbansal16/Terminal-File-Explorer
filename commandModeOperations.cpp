@@ -8,6 +8,7 @@ COPYRIGHT PROTECTED
 extern vector<string> Flist;
 extern vector<string> stackBackHistory; // ./|dir1/|dir2|
 extern unsigned long windLine;
+extern unsigned long col;
 extern unsigned long tailOmit;
 extern map <string,bool> fileToISDirecMap;
 vector<string> searchResults;
@@ -757,13 +758,14 @@ enum CommandState printSearchResults(vector<string> searchResults, string search
 			per+=((mode & S_IROTH) ? "r" : "-");
 			per+=((mode & S_IWOTH) ? "w" : "-");
 			per+=((mode & S_IXOTH) ? "x" : "-");
-			//string time=((string)ctime(&info.st_mtime)).substr(0,24);
-			printf("%4s",per.c_str());
-			//printf(" %4s",pswd->pw_name);
-			//printf(" %4s",grp->gr_name);
-			//printf(" %4s",time.c_str());
-			//printHumanReadableSize(info.st_size);
-			printf(" %s",(searchedFile.substr(1,searchedFile.size()-1)).c_str()); 
+			printf("%s",per.c_str());
+			string fName=(searchedFile.substr(1,searchedFile.size()-1));
+			
+			//dynamic adjustment of text based on window columns
+			if(fName.size()+12>col)
+	        	printf(" %s...",(fName.substr(0,col-14)).c_str());
+			else
+        		printf(" %s",fName.c_str());
 			printf("\n");
         }
         return SUCCESS_SEARCH;

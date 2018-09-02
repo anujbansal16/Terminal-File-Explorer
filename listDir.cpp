@@ -10,6 +10,7 @@ vector<string> Flist;
 struct winsize w;
 unsigned long tailOmit=1;
 unsigned long windLine;
+unsigned long col;
 vector<string> stackBackHistory; // ./|dir1/|dir2|
 vector<string> stackForwardHistory;// dir1|dir2|
 map <string,bool> fileToISDirecMap; //filename mapping to boolean to determine if file is directory
@@ -24,7 +25,12 @@ void printFilesWinDependent(unsigned long firstIndex,unsigned long lastIndex,str
         }
         cursorMove(1000,1);
         cursorUp(1);
-        cout<<(stackBackHistory.back()).substr(1,(stackBackHistory.back()).size()-1);
+        string displayPath=(stackBackHistory.back()).substr(1,(stackBackHistory.back()).size()-1);
+        if(displayPath.size()+1>col)
+            printf("%s...",(displayPath.substr(0,col-3)).c_str());
+        else
+        printf("%s",displayPath.c_str());
+        //cout<<(stackBackHistory.back()).substr(1,(stackBackHistory.back()).size()-1);
 }
 
 
@@ -233,6 +239,7 @@ unsigned long initialLS(){
         stackForwardHistory.clear();
         ioctl(0, TIOCGWINSZ, &w);
         windLine=w.ws_row-1;
+        col=w.ws_col;
 		unsigned long totalfiles;	
         //struct dirent *pDirent;
         DIR *pDir;
@@ -326,15 +333,18 @@ void printStatInfo(struct stat info, string fName){
     //SIZE TO BE HUMAN READABLE
     //string time=(string(asctime(gmtime(&(info.st_mtime))))).substr(0,24);
     string time=((string)ctime(&info.st_mtime)).substr(0,24);
-    printf("%4s",per.c_str());
-    printf(" %4s",pswd->pw_name);
-    printf(" %4s",grp->gr_name);
-    printf(" %4s",time.c_str());
+    printf("%s",per.c_str());
+    cout<<setw(8)<<right<<pswd->pw_name;
+    //printf(" %s",pswd->pw_name);
+    cout<<setw(8)<<right<<grp->gr_name;
+    // printf(" %s",grp->gr_name);
+    printf(" %s",time.c_str());
     printHumanReadableSize(info.st_size);
-    printf(" %13s",fName.c_str());
-
-    //commented bcz of spacing issue
-    //cout<<per<<"\t"<<pswd->pw_name<<"\t"<<grp->gr_name<<"\t"<<info.st_size<<"\t"<<setw(10)<<fName;
+    //dynamic adjustment of text based on window columns
+    if(fName.size()+62>col)
+        printf(" %s...",(fName.substr(0,col-64)).c_str());
+    else
+        printf(" %s",fName.c_str());
     cout<<endl; 
 }
 

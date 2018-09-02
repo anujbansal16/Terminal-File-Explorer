@@ -69,18 +69,34 @@ void printHumanReadableSize(long size)
   long Tb = Gb * 1024;
   long Pb = Tb * 1024;
   long Eb = Pb * 1024;
+  float val=size;
   if (size <  Kb)                 
-    printf("  %7.2fb",1.0*size);
-  if (size >= Kb && size < Mb)
-    printf("  %7.2fKb",1.0*size/Kb);
-  if (size >= Mb && size < Gb)
-    printf("  %7.2fMb",1.0*size/Mb);
-  if (size >= Gb && size < Tb)
-    printf("  %7.2fGb",1.0*size/Gb);
-  if (size >= Tb && size < Pb)
-    printf("  %7.2fTb",1.0*size/Tb);
-  if (size >= Pb && size < Eb)
-    printf("  %7.2fPb",1.0*size/Pb);  
+    cout<<setw(7)<<right<<val<<setw(2)<<right<<"b";
+  if (size >= Kb && size < Mb){
+    val=1.0*size/Kb;
+    val=(int)(val*10+0.5)/10.0;
+    cout<<setw(7)<<right<<val<<setw(2)<<right<<"Kb";
+  }
+  if (size >= Mb && size < Gb){
+    val=1.0*size/Mb;
+    val=(int)(val*10+0.5)/10.0;
+    cout<<setw(7)<<right<<val<<setw(2)<<right<<"Mb";
+  }
+  if (size >= Gb && size < Tb){
+    val=1.0*size/Gb;
+    val=(int)(val*10+0.5)/10.0;
+    cout<<setw(7)<<right<<val<<setw(2)<<right<<"Gb";
+  }
+  if (size >= Tb && size < Pb){
+    val=1.0*size/Tb;
+    val=(int)(val*10+0.5)/10.0;
+    cout<<setw(7)<<right<<val<<setw(2)<<right<<"Tb";
+  }
+  if (size >= Pb && size < Eb){
+    val=1.0*size/Pb;
+    val=(int)(val*10+0.5)/10.0;
+    cout<<setw(7)<<right<<val<<setw(2)<<right<<"Pb";
+  }
 }
 void printInputBuffer(char inputBuffer[], long n){
   for (long i=0;i<n;i++)

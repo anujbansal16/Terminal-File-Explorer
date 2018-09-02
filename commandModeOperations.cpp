@@ -105,27 +105,67 @@ enum CommandState execute(vector<string> words){
 
 
 enum CommandState renameF(string source,string destination){
-	if( source[0]=='/' || source[0]=='~'){
-		cout<<"Give only the filename in pwd";
-		return FAILURE;
+	if((source[0]=='.'&&source[1]=='.') || (source[0]=='.'&&source[1]=='/') ){
+				cout<<"Path must start from / or ~ or directoryName not .";
+				return FAILURE;
 	}
-	if(destination[0]=='/'){
-		cout<<"New name can not contain /";
-		return FAILURE;
+	if(source[0]=='.'){
+		source=stackBackHistory.back();
 	}
+	else if(source[0]=='~'){
+		source=("."+source.substr(1,source.size()-1));
+	}
+	else if(source[0]=='/'){
+		if(source.size()==1){
+			cout<<"Can't rename the root directory";
+				return FAILURE;
+		}
+		else
+			source=("."+source);
+	}
+	else{
+		source=stackBackHistory.back()+source;
+	} 
+
+	if((destination[0]=='.'&&destination[1]=='.') || (destination[0]=='.'&&destination[1]=='/') ){
+				cout<<"Path must start from / or ~ or directoryName not .";
+				return FAILURE;
+	}
+	if(destination[0]=='.'){
+		destination=stackBackHistory.back();
+	}
+	else if(destination[0]=='~'){
+		destination=("."+destination.substr(1,destination.size()-1));
+	}
+	else if(destination[0]=='/'){
+		if(destination.size()==1){
+			cout<<"Newname cant be root directory";
+				return FAILURE;
+		}
+		else
+			destination=("."+destination);
+	}
+	else{
+		destination=stackBackHistory.back()+destination;
+	} 
 
 	struct stat info;
-	string path=stackBackHistory.back()+source;
-    int isFileNotExist=stat(path.c_str(),&info);
+    int isFileNotExist=stat(source.c_str(),&info);
     if(!isFileNotExist){
-    		if(isDirectory(path)){
-    			cout<<"Not a file: Is a Directory";
-        		return FAILURE;		
-    		}
-    		else{
-    			copyFile(path,stackBackHistory.back()+destination);
-    			deleteFile(path,true);
-    		}
+		int isNotRenamed = rename(source.c_str(), destination.c_str());
+		if(isNotRenamed == 0) {
+			DIR *pDir;
+			pDir = openDirectory((stackBackHistory.back()).c_str());
+			if(pDir==NULL)
+				return FAILURE;
+	        getFileList(pDir);
+	        printFilesWinDependent(0,windLine-tailOmit,"");
+	        closedir(pDir);
+		} 
+		else {
+			cout<<" Can't "<<RENAME<<strerror(errno);
+		}
+    
     }
     else{
         cout<<" Can't "<<RENAME<<" '"<<source<<"'"<<" : No such file or directory";
@@ -579,12 +619,29 @@ enum CommandState snapShotF(string path, string destination){
 	else{
 		path=stackBackHistory.back()+path+"/";
 	}
+
+	if((destination[0]=='.'&&destination[1]=='.') || (destination[0]=='.'&&destination[1]=='/') ){
+		cout<<"Path must start from / or ~ or directoryName not .";
+		return FAILURE;
+	}
+	if(destination[0]=='.'){
+		destination=stackBackHistory.back();
+	}
+	else if(destination[0]=='~'){
+		destination=("."+destination.substr(1,destination.size()-1));
+	}
+	else if(destination[0]=='/'){
+		if(destination.size()==1)
+			destination="."+destination;
+		else
+			destination=("."+destination);
+	}
+	else{
+		destination=stackBackHistory.back()+destination;
+	}
+
 	if(isDirectory(path)){
-		if(destination[0]=='/'){
-			cout<<"Enter a proper dumpfile Name";
-			return FAILURE;
-		}
-		snapRec(path,stackBackHistory.back()+destination,"");	
+		snapRec(path,destination,"");
 		DIR *pDir = openDirectory(stackBackHistory.back().c_str());
 		//load current directory again
 		if(pDir==NULL)

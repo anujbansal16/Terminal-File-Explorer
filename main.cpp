@@ -204,7 +204,7 @@ void commandMode(){
     //backspace
 	else if(c==K_BACKSPACE){
 		if(n!=0){
-			inputBuffer[n]='\0';
+			inputBuffer[n-1]='\0';
 			n--;
 			printCommandMode();
 			printInputBuffer(inputBuffer,n);

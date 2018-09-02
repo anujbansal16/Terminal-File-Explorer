@@ -139,7 +139,9 @@ void openFile(string filePath){
         exit(EXIT_FAILURE);
     }
     if (pid == 0) {
-        if(execl("/usr/bin/xdg-open", "xdg-open",filePath.c_str(),NULL)<0){
+        freopen("error.txt", "w", stdout);
+        if(execl("/usr/bin/mimeopen", "mimeopen","-n",filePath.c_str(),NULL)<0){
+        //if(execl("/usr/bin/xdg-open", "xdg-open",filePath.c_str(),NULL)<0){
             perror ("execv");
             exit(0);
         }
@@ -182,7 +184,7 @@ long enterDirectory(unsigned long indexOfFile){
           //  if(fileToISDirecMap[fName]&&(fName.compare(".")!=0)&&(fName.compare("..")!=0))
             //    stackForwardHistory.clear();
     }
-    string filePath=stackBackHistory.back()+fName+"/";//format - ./dirname/
+    string filePath=stackBackHistory.back()+fName;//format - ./dirname/
     //Check if file is directory and push its name in stack
     if(fileToISDirecMap.find(fName)!=fileToISDirecMap.end()){
         if(fileToISDirecMap[fName]){

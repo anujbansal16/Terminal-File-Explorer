@@ -71,31 +71,31 @@ void printHumanReadableSize(long size)
   long Eb = Pb * 1024;
   float val=size;
   if (size <  Kb)                 
-    cout<<setw(7)<<right<<val<<setw(2)<<right<<"b";
+    cout<<setw(7)<<right<<val<<setw(1)<<right<<"B";
   if (size >= Kb && size < Mb){
     val=1.0*size/Kb;
     val=(int)(val*10+0.5)/10.0;
-    cout<<setw(7)<<right<<val<<setw(2)<<right<<"Kb";
+    cout<<setw(7)<<right<<val<<setw(1)<<right<<"K";
   }
   if (size >= Mb && size < Gb){
     val=1.0*size/Mb;
     val=(int)(val*10+0.5)/10.0;
-    cout<<setw(7)<<right<<val<<setw(2)<<right<<"Mb";
+    cout<<setw(7)<<right<<val<<setw(1)<<right<<"M";
   }
   if (size >= Gb && size < Tb){
     val=1.0*size/Gb;
     val=(int)(val*10+0.5)/10.0;
-    cout<<setw(7)<<right<<val<<setw(2)<<right<<"Gb";
+    cout<<setw(7)<<right<<val<<setw(1)<<right<<"G";
   }
   if (size >= Tb && size < Pb){
     val=1.0*size/Tb;
     val=(int)(val*10+0.5)/10.0;
-    cout<<setw(7)<<right<<val<<setw(2)<<right<<"Tb";
+    cout<<setw(7)<<right<<val<<setw(1)<<right<<"T";
   }
   if (size >= Pb && size < Eb){
     val=1.0*size/Pb;
     val=(int)(val*10+0.5)/10.0;
-    cout<<setw(7)<<right<<val<<setw(2)<<right<<"Pb";
+    cout<<setw(7)<<right<<val<<setw(1)<<right<<"P";
   }
 }
 void printInputBuffer(char inputBuffer[], long n){

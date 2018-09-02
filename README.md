@@ -21,9 +21,9 @@ Things you need to install the software
 
 A step by step series of examples that tell you how to run the File Explorer
 	
-	* Once Downloaded the zip put it in the folder where you want to run the file explorer
+* Once Downloaded the zip put it in the folder where you want to run the file explorer
 
-Move to the file explorer folder
+Go to the file explorer folder
 
 ```
 cd Terminal-File-Explorer-master
@@ -45,7 +45,7 @@ Run the output file
 
 This file system works in two modes mainly:
 
-###Normal Mode
+### Normal Mode
 
 It is the default mode used to explore the current directory and navigate around in the filesystem.
 
@@ -61,7 +61,7 @@ It is the default mode used to explore the current directory and navigate around
 		Q/q: Quit from file explorer (will work in only Normal mode)
 
 
-###Command Mode
+### Command Mode
 
 The application can enter in the command mode whenever the “:” (colon) key 
 is pressed. Upon entering the command mode the user can enter and executes different commands on files and directories.
@@ -72,12 +72,13 @@ is pressed. Upon entering the command mode the user can enter and executes diffe
 		BACKSPACE=>Clear last character
 
 
-##Commands Documentation
+## Commands Documentation
 
 * **GOTO**- User can navigate to different directories by proving absolute and relative path
 
-Note: 	Absolute path starts from / or ~
-		Relative path starts from directoryName (not ./DirectoryName)
+Note:-
+*Absolute path starts from / or ~
+*Relative path starts from directoryName (not ./DirectoryName)
 
 Syntax
 
@@ -88,8 +89,8 @@ goto <directory_path>
 Examples:
 
 ```
-goto /				#goto application root
-goto ~				#goto application root
+goto /			#goto application root
+goto ~			#goto application root
 goto /dir/dir2		#absolute path
 goto ~/dir/dir2		#absolute path
 goto dir/dir2		#relative path from present working directory

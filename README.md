@@ -77,7 +77,7 @@ is pressed. Upon entering the command mode the user can enter and executes diffe
 * **Copy**- User can copy multiple files,folders(recursively), given the file names,folder names and destination directory path.
 
 	* Absolute path starts from / or ~
-	* Relative path starts from directoryName (not ./DirectoryName)
+	* Relative path starts from directoryName/FileName (not ./DirectoryName)
 
 Syntax
 
@@ -101,7 +101,7 @@ copy file2 dir1 dir2/dir3	#copy files from pwd to dir3 (this is relative path)
 * **Move**- User can move multiple files,folders(recursively), given the file names,folder names and destination directory path.
 
 	* Absolute path starts from / or ~
-	* Relative path starts from directoryName (not ./DirectoryName)
+	* Relative path starts from directoryName/FileName (not ./DirectoryName)
 
 Syntax
 
@@ -126,7 +126,7 @@ move file2 dir1 dir2/dir3	#move files from pwd to dir3 (this is relative path)
 * **Rename**- User can rename file/folder, given the old file/folder name or path(absolute/relative) and new file/folder name(absoulte/relative).
 
 	* Absolute path starts from / or ~
-	* Relative path starts from directoryName (not ./DirectoryName)
+	* Relative path starts from directoryName/FileName (not ./DirectoryName)
 
 Syntax
 
@@ -146,7 +146,7 @@ rename ~/dir1/file1 ~/dir1/file2	#rename file1 in dir1 to file2 (absolute path)
 * **Create File**- User can create a file given the file name and destination directory path (absolute/relative)
 
 	* Absolute path starts from / or ~
-	* Relative path starts from directoryName (not ./DirectoryName)
+	* Relative path starts from directoryName/FileName (not ./DirectoryName)
 
 Syntax
 
@@ -169,7 +169,7 @@ create_file file1 dir3		#create_file file1 in dir3 (relative path)
 * **Create Directory**- User can create a directory given the directory name and destination directory path (absolute/relative)
 
 	* Absolute path starts from / or ~
-	* Relative path starts from directoryName (not ./DirectoryName)
+	* Relative path starts from directoryName/FileName (not ./DirectoryName)
 
 Syntax
 
@@ -192,7 +192,7 @@ create_dir dir1 dir3		#create dir1 in dir3 (relative path)
 * **Delete file**- User can delete a file given the file path (absolute/relative)
 
 	* Absolute path starts from / or ~
-	* Relative path starts from directoryName (not ./DirectoryName)
+	* Relative path starts from directoryName/FileName (not ./DirectoryName)
 
 Syntax
 
@@ -214,7 +214,7 @@ delete_file file1		#delete file1 from pwd (relative path)
 * **Delete Directory**- User can delete a empty directory given the directory path (absolute/relative)
 
 	* Absolute path starts from / or ~
-	* Relative path starts from directoryName (not ./DirectoryName)
+	* Relative path starts from directoryName/FileName (not ./DirectoryName)
 
 Syntax
 
@@ -235,7 +235,7 @@ delete_dir dir1			#delete dir1 from pwd (relative path)
 * **GOTO**- User can navigate to different directories by providing absolute or relative path.
 
 	* Absolute path starts from / or ~
-	* Relative path starts from directoryName (not ./DirectoryName)
+	* Relative path starts from directoryName/FileName (not ./DirectoryName)
 
 Syntax
 
@@ -271,8 +271,8 @@ search dir1.txt		#delete dir1 from application root (relative search from pwd )
 * **Snapshot**- Given a base directory(absolute/relative) this command should recursively crawl the directory and store the output in dumpfile.Output format should be similar to ls -R
 
 Note:-
-* Absolute path starts from / or ~
-* Relative path starts from directoryName (not ./DirectoryName)
+* **Relative path starts from directoryName/FileName (not ./DirectoryName)**
+* **Absolute path starts from ~ or / **
 
 Syntax
 
@@ -291,7 +291,7 @@ snapshot dir/dir2 dumpfile	#snapshot dir2 to dumpfile (relative path)
 
 **NOTE:-**
 * **Absolute path starts from ~ or / **
-* **Relative path starts from directoryName (not ./DirectoryName)**
+* **Relative path starts from directoryName/FileName (not ./DirectoryName)**
 
 ## Author
 

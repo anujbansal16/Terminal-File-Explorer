@@ -136,8 +136,8 @@ rename <old_filename> <new_filename>
 Examples
 
 ```
-rename file1 file2					#rename file1 to file2 in pwd (relative path)
-rename dir dir2						#rename dir1 to dir2 in pwd (relative path)
+rename file1 file2			#rename file1 to file2 in pwd (relative path)
+rename dir dir2				#rename dir1 to dir2 in pwd (relative path)
 rename /dir1/file1 /dir1/file2		#rename file1 in dir1 to file2 (absolute path)
 rename ~/dir1/file1 ~/dir1/file2	#rename file1 in dir1 to file2 (absolute path)
 ```
@@ -291,7 +291,7 @@ snapshot dir/dir2 dumpfile	#snapshot dir2 to dumpfile (relative path)
 
 Note:-
 
-* **Absolute path starts from / or ~**
+* **Absolute path starts from / or ~ **
 * **Relative path starts from directoryName (not ./DirectoryName)**
 
 ## Author

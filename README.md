@@ -1,6 +1,6 @@
 # Terminal-File-Explorer
-This is a console based File Explorer developed in C++ which operates on linux terminal, which uses the operating system's internal functionalities/calls for the implementation of various services.
-It provides a interface to the users for managing the files and directories thereby performing various operations on them.
+This is a console based File Explorer developed in C++ operates on linux terminal, which uses the operating system's internal functionalities/calls for the implementation of various services.
+It provides an interface to the users for managing the files and directories thereby performing various operations on them.
 The most common operations, a user can perform on files or groups of files include creating, opening, renaming, moving or copying, deleting and searching for files, and taking snapshot of a directory.
 
 ## Built With
@@ -90,11 +90,11 @@ destination_directory may be a abosolute or relative path of destination directo
 Examples:
 
 ```
-copy file1 file2 dir1 /		#copy files from pwd to application root
-copy file2 dir1 ~		#copy files from pwd to application root
-copy file2 dir1 .		#copy files from pwd to same pwd with '-copy' apended in the name of files
-copy file1 file2 dir1 /dir	#copy files from pwd dir (this is absoulte path)
-copy file2 dir1 dir2/dir3	#copy files from pwd to dir3 (this is relative path)
+copy file1 file2 dir1 /		#copy file1 and file2 from pwd to application root
+copy file2 dir1 ~		#copy file2 and directory dir1 from pwd to application root
+copy file2 dir1 .		#copy file2 and directory dir1 from pwd to same pwd with '-copy' apended in the name of files
+copy file1 file2 dir1 /dir	#copy file1 and file2 from pwd to dir (this is absoulte path)
+copy file2 dir1 dir2/dir3	#copy file2 and directory dir1 from pwd to dir3 (this is relative path)
 ```
 
 
@@ -114,12 +114,12 @@ destination_directory may be a absolute or relative path of destination director
 Examples:
 
 ```
-move file1 file2 dir1 /		#move files from pwd to application root
-move file2 dir1 ~		#move files from pwd to application root
-move file2 dir1 .		#move files from pwd to same pwd with '-copy' apended in the name of files
-move file1 file2 dir1 ~/dir	#move files from pwd dir (this is absoulte path)
-move file1 file2 dir1 /dir	#move files from pwd dir (this is absoulte path)
-move file2 dir1 dir2/dir3	#move files from pwd to dir3 (this is relative path)
+move file1 file2 dir1 /		#move file1 and file2 from pwd to application root
+move file2 dir1 ~		#move file1 and directory dir1 from pwd to application root
+move file2 dir1 .		#move file2 and directory dir1 from pwd to same pwd with '-copy' apended in the name of files
+move file1 file2 dir1 ~/dir	#move file1 and file2 from pwd to dir(this is absoulte path)
+move file1 file2 dir1 /dir	#move file1 and file2 from pwd to dir(this is absoulte path)
+move file2 dir1 dir2/dir3	#move file2 and directory1 from pwd to dir3(this is relative path)
 ```
 
 
@@ -137,7 +137,7 @@ Examples
 
 ```
 rename file1 file2			#rename file1 to file2 in pwd (relative path)
-rename dir dir2				#rename dir1 to dir2 in pwd (relative path)
+rename dir dir2				#rename dir to dir2 in pwd (relative path)
 rename /dir1/file1 /dir1/file2		#rename file1 in dir1 to file2 (absolute path)
 rename ~/dir1/file1 ~/dir1/file2	#rename file1 in dir1 to file2 (absolute path)
 ```
@@ -271,8 +271,8 @@ search dir1.txt		#delete dir1 from application root (relative search from pwd )
 * **Snapshot**- Given a base directory(absolute/relative) this command should recursively crawl the directory and store the output in dumpfile.Output format should be similar to ls -R
 
 Note:-
-* **Relative path starts from directoryName/FileName (not ./DirectoryName)**
-* **Absolute path starts from ~ or / **
+* Relative path starts from directoryName/FileName (not ./DirectoryName)
+* Absolute path starts from ~ or / 
 
 Syntax
 
@@ -290,7 +290,7 @@ snapshot dir/dir2 dumpfile	#snapshot dir2 to dumpfile (relative path)
 
 
 **NOTE:-**
-* **Absolute path starts from ~ or / **
+* **Absolute path starts from ~ or **
 * **Relative path starts from directoryName/FileName (not ./DirectoryName)**
 
 ## Author

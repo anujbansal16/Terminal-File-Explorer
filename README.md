@@ -290,7 +290,7 @@ snapshot dir/dir2 dumpfile	#snapshot dir2 to dumpfile (relative path)
 
 
 **NOTE:-**
-* **Absolute path starts from / or ~
+* **Absolute path starts from ~ or / **
 * **Relative path starts from directoryName (not ./DirectoryName)**
 
 ## Author

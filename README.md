@@ -21,21 +21,22 @@ Things you need to install the software
 
 A step by step series of examples that tell you how to run the File Explorer
 	
-* Once Downloaded the zip put it in the folder where you want to run the file explorer
-
-Go to the file explorer folder
+1. Downloaded the zip 
+2. Go to the file explorer folder
 
 ```
 cd Terminal-File-Explorer-master
 ```
 
-Run the make file to build application
+3. Run the make file to build application
 
 ```
 make
 ```
 
-Run the output file
+4. Copy the generated **FileExplorer** file to the folder where you want the File Explorer to start (this folder now becomes the root folder for the File Explorer)
+
+5. Go to above root folder and run the output file
 
 ```
 ./FileExplorer

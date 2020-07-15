@@ -1,3 +1,4 @@
+# THIS CODE SUCKS BRO :)
 # Terminal-File-Explorer
 This is a console based File Explorer developed in C++ operates on linux terminal, which uses the operating system's internal functionalities/calls for the implementation of various services.
 It provides an interface to the users for managing the files and directories thereby performing various operations on them.
